@@ -1,0 +1,120 @@
+name: ECHO_1997 BUILD 3
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Pobierz projekt
+        uses: actions/checkout@v4
+
+      - name: Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Sprawdz Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT"
+          which sdkmanager
+          sdkmanager --version
+
+      - name: Zaakceptuj licencje
+        run: |
+          yes | sdkmanager --licenses || true
+
+      - name: Zainstaluj Android 35
+        run: |
+          sdkmanager "platform-tools"
+          sdkmanager "platforms;android-35"
+          sdkmanager "build-tools;35.0.0"
+
+      - name: Gradle 8.9
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Sprawdz projekt
+        run: |
+          echo "=== PLIKI REPO ==="
+          ls -la
+
+          echo "=== PROJEKT ECHO ==="
+          ls -la ECHO_1997_GITHUB_ROOT
+
+          test -f ECHO_1997_GITHUB_ROOT/settings.gradle
+          test -f ECHO_1997_GITHUB_ROOT/build.gradle
+          test -f ECHO_1997_GITHUB_ROOT/app/build.gradle
+          test -f ECHO_1997_GITHUB_ROOT/app/src/main/AndroidManifest.xml
+          test -f ECHO_1997_GITHUB_ROOT/app/src/main/assets/index.html
+
+          echo "PROJEKT OK"
+
+      - name: Wyczyść projekt
+        working-directory: ECHO_1997_GITHUB_ROOT
+        run: |
+          gradle clean --no-daemon --stacktrace
+
+      - name: ZBUDUJ APK
+        working-directory: ECHO_1997_GITHUB_ROOT
+        run: |
+          gradle :app:assembleDebug \
+            --no-daemon \
+            --stacktrace
+
+      - name: Znajdz APK
+        run: |
+          echo "=== SZUKAM APK ==="
+
+          find ECHO_1997_GITHUB_ROOT \
+            -type f \
+            -name "*.apk" \
+            -print
+
+          APK=$(find ECHO_1997_GITHUB_ROOT/app/build/outputs/apk \
+            -type f \
+            -name "*.apk" \
+            | head -n 1)
+
+          if [ -z "$APK" ]; then
+            echo "NIE ZNALEZIONO APK"
+            exit 1
+          fi
+
+          echo "APK=$APK" >> "$GITHUB_ENV"
+          echo "ZNALEZIONO: $APK"
+
+      - name: Przygotuj ECHO_1997.apk
+        run: |
+          mkdir -p FINAL_APK
+
+          cp "$APK" FINAL_APK/ECHO_1997.apk
+
+          echo "=== GOTOWY APK ==="
+          ls -lh FINAL_APK/ECHO_1997.apk
+
+          sha256sum FINAL_APK/ECHO_1997.apk
+
+      - name: Wyslij APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: ECHO_1997-APK
+          path: FINAL_APK/ECHO_1997.apk
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
+
+      - name: GOTOWE
+        if: success()
+        run: |
+          echo "================================="
+          echo " ECHO_1997.APK ZBUDOWANY"
+          echo "================================="
