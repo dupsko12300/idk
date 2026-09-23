@@ -1,0 +1,5031 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>ECHO_1997 — ONE FILE MOBILE BUILD</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@400;700;900&display=swap');
+
+*{
+ box-sizing:border-box;
+ user-select:none;
+ -webkit-user-select:none;
+ touch-action:none;
+}
+
+html,body{
+ margin:0;
+ width:100%;
+ height:100%;
+ overflow:hidden;
+ background:#000;
+ font-family:"Roboto Condensed",Arial,sans-serif;
+}
+
+canvas{display:block}
+
+#loading,#menu,#fade,#chapter,#vhs,#mapScreen,#ending{
+ position:fixed;
+ inset:0;
+}
+
+#loading{
+ z-index:1000;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ flex-direction:column;
+ background:#000;
+ color:#fff;
+}
+
+.logo{
+ font-size:72px;
+ font-weight:900;
+ letter-spacing:13px;
+}
+
+.logoYear{
+ font-size:16px;
+ letter-spacing:17px;
+ opacity:.35;
+ margin-top:10px;
+}
+
+.loadBar{
+ width:min(380px,70vw);
+ height:2px;
+ background:#222;
+ margin-top:40px;
+}
+
+#loadFill{
+ height:100%;
+ width:0%;
+ background:white;
+}
+
+#loadText{
+ margin-top:12px;
+ font-size:10px;
+ letter-spacing:3px;
+ opacity:.4;
+}
+
+#menu{
+ z-index:900;
+ display:none;
+ color:white;
+ background:
+ radial-gradient(circle at 70% 35%,#263e4b55,transparent 38%),
+ linear-gradient(100deg,#020304,#071015 60%,#111b20);
+}
+
+.menuContent{
+ position:absolute;
+ left:7vw;
+ top:50%;
+ transform:translateY(-50%);
+}
+
+.gameTitle{
+ font-size:clamp(55px,8vw,100px);
+ font-weight:900;
+ line-height:.75;
+}
+
+.gameTitle span{
+ display:block;
+ margin-top:25px;
+ font-size:18px;
+ letter-spacing:17px;
+ opacity:.32;
+}
+
+.menuButton{
+ width:310px;
+ max-width:70vw;
+ padding:14px 16px;
+ margin-top:8px;
+ font-size:18px;
+ font-weight:700;
+ opacity:.55;
+ border-left:4px solid transparent;
+ cursor:pointer;
+}
+
+.menuButton:hover{
+ opacity:1;
+ border-left-color:white;
+ padding-left:25px;
+ background:#ffffff08;
+}
+
+#version{
+ position:absolute;
+ right:20px;
+ bottom:18px;
+ opacity:.3;
+ font-size:10px;
+ letter-spacing:2px;
+}
+
+#hud{
+ position:fixed;
+ inset:0;
+ z-index:100;
+ pointer-events:none;
+ display:none;
+}
+
+#crosshair{
+ position:absolute;
+ left:50%;
+ top:50%;
+ width:5px;
+ height:5px;
+ background:white;
+ border-radius:50%;
+ transform:translate(-50%,-50%);
+ opacity:.65;
+}
+
+#objective{
+ position:absolute;
+ left:25px;
+ bottom:25px;
+ color:white;
+ text-shadow:0 2px 7px #000;
+}
+
+#objective small{
+ font-size:9px;
+ letter-spacing:3px;
+ opacity:.45;
+}
+
+#objectiveText{
+ margin-top:4px;
+ font-size:18px;
+ font-weight:700;
+}
+
+#clockUI{
+ position:absolute;
+ right:25px;
+ top:22px;
+ text-align:right;
+ color:white;
+ text-shadow:0 2px 6px #000;
+}
+
+#timeUI{
+ font-size:21px;
+ font-weight:700;
+}
+
+#dateUI{
+ font-size:9px;
+ letter-spacing:2px;
+ opacity:.5;
+}
+
+#batteryUI{
+ position:absolute;
+ right:25px;
+ bottom:25px;
+ color:white;
+ text-align:right;
+}
+
+#batteryUI small{
+ font-size:9px;
+ letter-spacing:2px;
+ opacity:.45;
+}
+
+#batteryBox{
+ width:100px;
+ height:5px;
+ margin-top:5px;
+ border:1px solid #ffffff66;
+}
+
+#batteryFill{
+ width:100%;
+ height:100%;
+ background:#fff;
+}
+
+#interaction{
+ position:absolute;
+ left:50%;
+ top:62%;
+ transform:translateX(-50%);
+ color:white;
+ font-size:16px;
+ font-weight:700;
+ opacity:0;
+ text-shadow:0 2px 7px #000;
+}
+
+#subtitle{
+ position:absolute;
+ left:50%;
+ bottom:8%;
+ transform:translateX(-50%);
+ width:min(850px,88vw);
+ text-align:center;
+ color:white;
+ display:none;
+ text-shadow:
+ -1px -1px #000,
+ 1px -1px #000,
+ -1px 1px #000,
+ 1px 1px #000,
+ 0 3px 8px #000;
+}
+
+#speaker{
+ font-size:11px;
+ font-weight:900;
+ letter-spacing:2px;
+}
+
+#subtitleText{
+ margin-top:5px;
+ font-size:21px;
+}
+
+#continueText{
+ margin-top:9px;
+ font-size:9px;
+ letter-spacing:2px;
+ opacity:.4;
+}
+
+#notification{
+ position:absolute;
+ left:50%;
+ top:72%;
+ transform:translate(-50%,-50%);
+ color:white;
+ text-align:center;
+ font-size:17px;
+ opacity:0;
+ transition:.3s;
+ text-shadow:0 2px 7px black;
+}
+
+#waypoint{
+ position:absolute;
+ transform:translate(-50%,-50%);
+ color:#ffda48;
+ text-align:center;
+ display:none;
+ text-shadow:0 2px 5px black;
+}
+
+#wpIcon{font-size:25px}
+#wpName{font-size:12px;font-weight:900}
+#wpDistance{font-size:10px;color:white}
+
+#areaName{
+ position:absolute;
+ right:32px;
+ bottom:90px;
+ color:white;
+ text-align:right;
+ opacity:0;
+ transition:.7s;
+}
+
+#areaName strong{
+ display:block;
+ font-size:28px;
+ font-weight:400;
+ font-style:italic;
+}
+
+#areaName span{
+ font-size:9px;
+ letter-spacing:3px;
+ opacity:.5;
+}
+
+/* MOBILE */
+
+#mobileUI{
+ position:fixed;
+ inset:0;
+ z-index:180;
+ pointer-events:none;
+ display:none;
+}
+
+.joystick{
+ position:absolute;
+ width:125px;
+ height:125px;
+ border-radius:50%;
+ border:2px solid #ffffff26;
+ background:#ffffff0b;
+ pointer-events:auto;
+ backdrop-filter:blur(2px);
+}
+
+.stick{
+ position:absolute;
+ left:50%;
+ top:50%;
+ width:54px;
+ height:54px;
+ transform:translate(-50%,-50%);
+ border-radius:50%;
+ background:#ffffff32;
+ border:2px solid #ffffff55;
+}
+
+#moveJoy{
+ left:25px;
+ bottom:28px;
+}
+
+#lookJoy{
+ right:25px;
+ bottom:28px;
+ opacity:.5;
+}
+
+.mobileButton{
+ position:absolute;
+ width:58px;
+ height:58px;
+ border-radius:50%;
+ background:#101619bb;
+ border:2px solid #ffffff3b;
+ color:white;
+ display:flex;
+ align-items:center;
+ justify-content:center;
+ font-weight:900;
+ pointer-events:auto;
+ box-shadow:0 3px 12px #0008;
+}
+
+#buttonE{
+ right:170px;
+ bottom:48px;
+}
+
+#buttonJump{
+ right:115px;
+ bottom:118px;
+ font-size:10px;
+}
+
+#buttonFlash{
+ right:48px;
+ bottom:175px;
+}
+
+#buttonMap{
+ right:118px;
+ bottom:190px;
+ font-size:10px;
+}
+
+#chapter{
+ z-index:700;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ flex-direction:column;
+ background:#000;
+ color:white;
+}
+
+#chapterSmall{
+ font-size:10px;
+ letter-spacing:5px;
+ opacity:.4;
+}
+
+#chapterBig{
+ margin-top:10px;
+ font-size:40px;
+ font-weight:900;
+ letter-spacing:5px;
+ text-align:center;
+}
+
+#fade{
+ z-index:800;
+ pointer-events:none;
+ background:black;
+ opacity:1;
+ transition:.65s;
+}
+
+#vhs{
+ z-index:750;
+ display:none;
+ background:#030303;
+ color:white;
+ font-family:monospace;
+}
+
+#vhs::after{
+ content:"";
+ position:absolute;
+ inset:0;
+ background:repeating-linear-gradient(
+ 0deg,
+ transparent 0,
+ transparent 3px,
+ #ffffff0d 4px
+ );
+ pointer-events:none;
+}
+
+#vhsTop{
+ position:absolute;
+ left:30px;
+ top:25px;
+ font-size:18px;
+}
+
+#vhsCenter{
+ position:absolute;
+ left:50%;
+ top:50%;
+ transform:translate(-50%,-50%);
+ text-align:center;
+ width:90%;
+}
+
+#vhsBig{
+ font-size:clamp(24px,5vw,42px);
+ font-weight:bold;
+ letter-spacing:5px;
+}
+
+#vhsSmall{
+ margin-top:15px;
+ opacity:.5;
+}
+
+#mapScreen{
+ z-index:650;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ flex-direction:column;
+ background:#101517f5;
+ color:white;
+}
+
+#mapTitle{
+ font-size:32px;
+ font-weight:900;
+ letter-spacing:4px;
+}
+
+#mapText{
+ margin-top:25px;
+ line-height:2;
+ text-align:center;
+ opacity:.7;
+}
+
+#mapClose{
+ margin-top:30px;
+ font-size:10px;
+ letter-spacing:3px;
+ opacity:.4;
+}
+
+#ending{
+ z-index:950;
+ display:none;
+ align-items:center;
+ justify-content:center;
+ flex-direction:column;
+ background:#000;
+ color:white;
+ text-align:center;
+}
+
+#ending h1{
+ font-size:50px;
+ letter-spacing:8px;
+}
+
+#ending p{
+ opacity:.55;
+ max-width:600px;
+ line-height:1.7;
+}
+
+@media(pointer:coarse),(max-width:850px){
+ #mobileUI{display:block}
+ #objective{bottom:170px}
+ #batteryUI{bottom:165px}
+ #crosshair{opacity:.35}
+ #lookJoy{display:none}
+}
+</style>
+
+<script type="importmap">
+{
+ "imports":{
+  "three":"https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.module.js"
+ }
+}
+</script>
+</head>
+
+<body>
+
+<div id="loading">
+ <div class="logo">ECHO</div>
+ <div class="logoYear">1997</div>
+ <div class="loadBar"><div id="loadFill"></div></div>
+ <div id="loadText">URUCHAMIANIE...</div>
+</div>
+
+<div id="menu">
+ <div class="menuContent">
+  <div class="gameTitle">ECHO<span>1997</span></div>
+  <div class="menuButton" id="newGame">NOWA GRA</div>
+  <div class="menuButton" id="continueGame">KONTYNUUJ</div>
+  <div class="menuButton" id="deleteSave">USUŃ ZAPIS</div>
+ </div>
+ <div id="version">v0.6 • ONE FILE / MOBILE BUILD</div>
+</div>
+
+<div id="hud">
+
+ <div id="crosshair"></div>
+
+ <div id="objective">
+  <small>CEL</small>
+  <div id="objectiveText">...</div>
+ </div>
+
+ <div id="clockUI">
+  <div id="timeUI">23:48</div>
+  <div id="dateUI">18.10.1997</div>
+ </div>
+
+ <div id="batteryUI">
+  <small>LATARKA</small>
+  <div id="batteryBox"><div id="batteryFill"></div></div>
+ </div>
+
+ <div id="interaction"></div>
+
+ <div id="notification"></div>
+
+ <div id="waypoint">
+  <div id="wpIcon">▼</div>
+  <div id="wpName"></div>
+  <div id="wpDistance"></div>
+ </div>
+
+ <div id="areaName">
+  <strong></strong>
+  <span></span>
+ </div>
+
+ <div id="subtitle">
+  <div id="speaker"></div>
+  <div id="subtitleText"></div>
+  <div id="continueText">E / DOTKNIJ INTERAKCJI — DALEJ</div>
+ </div>
+
+</div>
+
+<div id="mobileUI">
+
+ <div class="joystick" id="moveJoy">
+  <div class="stick" id="moveStick"></div>
+ </div>
+
+ <div class="joystick" id="lookJoy">
+  <div class="stick"></div>
+ </div>
+
+ <div class="mobileButton" id="buttonE">E</div>
+ <div class="mobileButton" id="buttonJump">SKOK</div>
+ <div class="mobileButton" id="buttonFlash">🔦</div>
+ <div class="mobileButton" id="buttonMap">MAPA</div>
+
+</div>
+
+<div id="chapter">
+ <div id="chapterSmall"></div>
+ <div id="chapterBig"></div>
+</div>
+
+<div id="vhs">
+ <div id="vhsTop">PLAY ▶</div>
+ <div id="vhsCenter">
+  <div id="vhsBig"></div>
+  <div id="vhsSmall"></div>
+ </div>
+</div>
+
+<div id="mapScreen">
+ <div id="mapTitle">GREYFIELD</div>
+ <div id="mapText"></div>
+ <div id="mapClose">M / MAPA — ZAMKNIJ</div>
+</div>
+
+<div id="ending">
+ <h1>ECHO</h1>
+ <p id="endingText"></p>
+</div>
+
+<div id="fade"></div>
+
+<script type="module">
+
+import * as THREE from "three";
+
+const $=s=>document.querySelector(s);
+
+const SAVE_KEY="ECHO_1997_V06";
+
+/* =========================================================
+   ENGINE
+========================================================= */
+
+const scene=new THREE.Scene();
+
+scene.background=new THREE.Color(0x071015);
+scene.fog=new THREE.FogExp2(0x071015,.008);
+
+const camera=new THREE.PerspectiveCamera(
+ 72,
+ innerWidth/innerHeight,
+ .025,
+ 900
+);
+
+const renderer=new THREE.WebGLRenderer({
+ antialias:true,
+ powerPreference:"high-performance"
+});
+
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+
+renderer.shadowMap.enabled=true;
+renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+
+renderer.outputColorSpace=THREE.SRGBColorSpace;
+renderer.toneMapping=THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure=.92;
+
+document.body.appendChild(renderer.domElement);
+
+const clock=new THREE.Clock();
+
+/* =========================================================
+   STATE
+========================================================= */
+
+const state={
+ quest:"INTRO_MAYA",
+ minutes:23*60+48,
+ day:18,
+
+ flashlight:false,
+ battery:100,
+
+ hasMap:false,
+ timeline:0,
+
+ train:false,
+
+ flags:{}
+};
+
+const player={
+ pos:new THREE.Vector3(-8,1.72,91),
+ vy:0,
+ grounded:true,
+ radius:.33
+};
+
+let yaw=Math.PI;
+let pitch=0;
+
+let playing=false;
+let dialogueActive=false;
+let mapOpen=false;
+
+const keys={};
+
+let drag=false;
+let lastMouseX=0;
+let lastMouseY=0;
+
+let mobileForward=0;
+let mobileSide=0;
+
+let walkPhase=0;
+
+/* =========================================================
+   MATERIALS
+========================================================= */
+
+function material(color,rough=.8,metal=.02){
+ return new THREE.MeshStandardMaterial({
+  color,
+  roughness:rough,
+  metalness:metal
+ });
+}
+
+const M={
+ grass:material(0x152018,1),
+ road:material(0x11171a,.62,.12),
+ pavement:material(0x555b58,.95),
+ concrete:material(0x666862,.95),
+ concreteDark:material(0x404542,.96),
+
+ brick:material(0x594139,.94),
+ brickDark:material(0x40302c,.96),
+
+ plaster:material(0x74756d,.96),
+ plasterDark:material(0x515651,.96),
+
+ wood:material(0x513722,.87),
+ darkWood:material(0x2b1d16,.92),
+
+ metal:material(0x485053,.38,.68),
+ darkMetal:material(0x171d1f,.5,.55),
+
+ black:material(0x090b0c,.85),
+ white:material(0xd0cec1,.86),
+
+ red:material(0x71372f,.8),
+ blue:material(0x334e62,.8),
+ green:material(0x3e5947,.85),
+
+ yellow:material(0xcaa23d,.75),
+
+ skin:material(0xb98b6f,.85),
+ jeans:material(0x25313a,.88),
+
+ trainRed:material(0x642c29,.7,.15),
+ trainCream:material(0xb2aa91,.82),
+
+ seat:material(0x38544c,.88)
+};
+
+const GLASS=new THREE.MeshPhysicalMaterial({
+ color:0x547b89,
+ roughness:.12,
+ metalness:.05,
+ transparent:true,
+ opacity:.38
+});
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+const colliders=[];
+const interactions=[];
+
+function box(
+ x,y,z,
+ w,h,d,
+ mat=M.white,
+ collision=false,
+ parent=scene
+){
+ const mesh=new THREE.Mesh(
+  new THREE.BoxGeometry(w,h,d),
+  mat
+ );
+
+ mesh.position.set(x,y,z);
+
+ mesh.castShadow=true;
+ mesh.receiveShadow=true;
+
+ parent.add(mesh);
+
+ if(collision){
+  const c={
+   x,z,w,d,
+   enabled:true,
+   parent,
+   mesh
+  };
+
+  colliders.push(c);
+  mesh.userData.collider=c;
+ }
+
+ return mesh;
+}
+
+function cylinder(
+ x,y,z,
+ radius,height,
+ mat=M.white,
+ parent=scene,
+ segments=12
+){
+ const mesh=new THREE.Mesh(
+  new THREE.CylinderGeometry(
+   radius,radius,height,segments
+  ),
+  mat
+ );
+
+ mesh.position.set(x,y,z);
+ mesh.castShadow=true;
+ mesh.receiveShadow=true;
+
+ parent.add(mesh);
+
+ return mesh;
+}
+
+function sphere(
+ x,y,z,
+ radius,
+ mat=M.white,
+ parent=scene
+){
+ const mesh=new THREE.Mesh(
+  new THREE.SphereGeometry(radius,16,12),
+  mat
+ );
+
+ mesh.position.set(x,y,z);
+ mesh.castShadow=true;
+
+ parent.add(mesh);
+
+ return mesh;
+}
+
+function plane(
+ x,y,z,
+ w,d,
+ mat=M.white,
+ parent=scene
+){
+ const mesh=new THREE.Mesh(
+  new THREE.PlaneGeometry(w,d),
+  mat
+ );
+
+ mesh.rotation.x=-Math.PI/2;
+ mesh.position.set(x,y,z);
+
+ mesh.receiveShadow=true;
+
+ parent.add(mesh);
+
+ return mesh;
+}
+
+const wait=ms=>new Promise(r=>setTimeout(r,ms));
+
+function horizontalDistance(a,b){
+ return Math.hypot(a.x-b.x,a.z-b.z);
+}
+
+/* =========================================================
+   LIGHTING
+========================================================= */
+
+scene.add(
+ new THREE.HemisphereLight(
+  0x8499aa,
+  0x111811,
+  .38
+ )
+);
+
+const moonLight=new THREE.DirectionalLight(
+ 0xb6c8d8,
+ 1.1
+);
+
+moonLight.position.set(-90,120,50);
+
+moonLight.castShadow=true;
+moonLight.shadow.mapSize.set(2048,2048);
+
+moonLight.shadow.camera.left=-220;
+moonLight.shadow.camera.right=220;
+moonLight.shadow.camera.top=220;
+moonLight.shadow.camera.bottom=-220;
+
+scene.add(moonLight);
+
+const moon=sphere(
+ -120,95,-280,
+ 4,
+ new THREE.MeshBasicMaterial({
+  color:0xe2e8eb
+ })
+);
+
+/* stars */
+
+const starGeo=new THREE.BufferGeometry();
+const starPositions=[];
+
+for(let i=0;i<450;i++){
+
+ const x=(Math.random()-.5)*600;
+ const y=50+Math.random()*160;
+ const z=(Math.random()-.5)*600;
+
+ starPositions.push(x,y,z);
+}
+
+starGeo.setAttribute(
+ "position",
+ new THREE.Float32BufferAttribute(
+  starPositions,
+  3
+ )
+);
+
+scene.add(
+ new THREE.Points(
+  starGeo,
+  new THREE.PointsMaterial({
+   color:0xd9e1e5,
+   size:.45,
+   transparent:true,
+   opacity:.6
+  })
+ )
+);
+
+/* =========================================================
+   EXACT MAP
+========================================================= */
+
+const LOC={
+ BUS:new THREE.Vector3(-8,0,91),
+
+ MAYA:new THREE.Vector3(-9,0,67),
+
+ HOME_GATE:new THREE.Vector3(-18,0,50),
+ HOME_DOOR:new THREE.Vector3(-18,0,48.4),
+ HOME_VHS:new THREE.Vector3(-15,0,41),
+
+ MILLERS:new THREE.Vector3(-20,0,-18),
+
+ PHONE:new THREE.Vector3(8,0,-39),
+
+ CINEMA:new THREE.Vector3(21,0,-57),
+
+ MOTEL:new THREE.Vector3(-22,0,-75),
+
+ POLICE:new THREE.Vector3(21,0,-91),
+
+ SCHOOL:new THREE.Vector3(-25,0,-108),
+
+ STATION:new THREE.Vector3(2,0,-138),
+
+ PLATFORM:new THREE.Vector3(-8,0,-154),
+
+ PLATFORM_END:new THREE.Vector3(-21,0,-154),
+
+ TRACK:new THREE.Vector3(-6,0,-166),
+
+ TUNNEL:new THREE.Vector3(-6,0,-220),
+
+ TELECOM:new THREE.Vector3(29,0,-111)
+};
+
+/* =========================================================
+   GROUND / ROAD
+========================================================= */
+
+plane(
+ 0,-.03,-70,
+ 520,520,
+ M.grass
+);
+
+plane(
+ 0,.01,-55,
+ 14,330,
+ M.road
+);
+
+plane(
+ -9,.03,-55,
+ 4,330,
+ M.pavement
+);
+
+plane(
+ 9,.03,-55,
+ 4,330,
+ M.pavement
+);
+
+box(
+ -6.9,.13,-55,
+ .28,.26,330,
+ M.concrete
+);
+
+box(
+ 6.9,.13,-55,
+ .28,.26,330,
+ M.concrete
+);
+
+for(let z=90;z>-205;z-=11){
+ box(
+  0,.04,z,
+  .1,.02,4.2,
+  M.white
+ );
+}
+
+/* =========================================================
+   WINDOWS
+========================================================= */
+
+function windowPanel(
+ x,y,z,
+ w=1.1,
+ h=1.4,
+ lit=false
+){
+
+ const mat=new THREE.MeshStandardMaterial({
+  color:lit?0xb88c5c:0x243944,
+  emissive:lit?0x7b4b23:0,
+  emissiveIntensity:lit?.8:0,
+  roughness:.25
+ });
+
+ const p=new THREE.Mesh(
+  new THREE.PlaneGeometry(w,h),
+  mat
+ );
+
+ p.position.set(x,y,z);
+ scene.add(p);
+
+ box(
+  x,y-h/2-.08,z+.05,
+  w+.18,.12,.15,
+  M.concrete
+ );
+}
+
+/* =========================================================
+   BUILDING GENERATOR
+========================================================= */
+
+function createBuilding({
+ x,z,w,d,floors=3,
+ mat=M.brick,
+ shop=false
+}){
+
+ const floorHeight=2.7;
+ const h=floors*floorHeight+.5;
+
+ box(
+  x,h/2,z,
+  w,h,d,
+  mat,
+  true
+ );
+
+ box(
+  x,h+.14,z,
+  w+.5,.28,d+.5,
+  M.black
+ );
+
+ const cols=Math.max(
+  2,
+  Math.floor(w/2.6)
+ );
+
+ for(let f=0;f<floors;f++){
+
+  for(let c=0;c<cols;c++){
+
+   if(shop&&f===0)continue;
+
+   const wx=
+    x-w/2+
+    (c+.5)*(w/cols);
+
+   const wy=
+    1.5+f*floorHeight;
+
+   windowPanel(
+    wx,
+    wy,
+    z+d/2+.01,
+    1.05,
+    1.35,
+    Math.random()<.3
+   );
+  }
+ }
+
+ if(shop){
+
+  for(let i=-1;i<=1;i++){
+
+   const glass=
+    new THREE.Mesh(
+     new THREE.PlaneGeometry(
+      1.7,
+      1.8
+     ),
+     new THREE.MeshStandardMaterial({
+      color:0x3f5d66,
+      emissive:0x3b2916,
+      emissiveIntensity:.35
+     })
+    );
+
+   glass.position.set(
+    x+i*2,
+    1.35,
+    z+d/2+.02
+   );
+
+   scene.add(glass);
+  }
+
+  box(
+   x,2.65,z+d/2+.7,
+   w*.75,.14,1.4,
+   M.red
+  );
+ }
+}
+
+/* city */
+
+createBuilding({
+ x:-19,z:10,w:13,d:13,
+ floors:3,mat:M.brick
+});
+
+createBuilding({
+ x:19,z:6,w:13,d:14,
+ floors:4,mat:M.plaster
+});
+
+createBuilding({
+ x:-20,z:-18,w:15,d:14,
+ floors:4,mat:M.plasterDark,
+ shop:true
+});
+
+createBuilding({
+ x:20,z:-32,w:14,d:13,
+ floors:3,mat:M.brickDark
+});
+
+createBuilding({
+ x:-20,z:-54,w:14,d:14,
+ floors:4,mat:M.brick
+});
+
+createBuilding({
+ x:21,z:-58,w:15,d:14,
+ floors:4,mat:M.plaster,
+ shop:true
+});
+
+createBuilding({
+ x:-22,z:-75,w:17,d:14,
+ floors:2,mat:M.plasterDark
+});
+
+createBuilding({
+ x:21,z:-91,w:16,d:14,
+ floors:3,mat:M.brickDark
+});
+
+createBuilding({
+ x:-25,z:-108,w:20,d:17,
+ floors:3,mat:M.brick
+});
+
+/* =========================================================
+   STREET DETAILS
+========================================================= */
+
+for(let z=82;z>-130;z-=19){
+
+ for(const side of [-1,1]){
+
+  const x=side*7.5;
+
+  cylinder(
+   x,2.7,z,
+   .065,5.4,
+   M.darkMetal
+  );
+
+  box(
+   x-side*.35,
+   5.25,
+   z,
+   .8,.1,.1,
+   M.darkMetal
+  );
+
+  const lamp=new THREE.PointLight(
+   0xffb66c,
+   11,
+   17,
+   2
+  );
+
+  lamp.position.set(
+   x-side*.7,
+   5,
+   z
+  );
+
+  scene.add(lamp);
+ }
+}
+
+/* trees */
+
+function tree(x,z){
+
+ cylinder(
+  x,1.7,z,
+  .18,3.4,
+  M.darkWood
+ );
+
+ const crown=
+  new THREE.Mesh(
+   new THREE.IcosahedronGeometry(
+    1.4,1
+   ),
+   M.green
+  );
+
+ crown.position.set(x,3.9,z);
+ crown.scale.y=1.3;
+ crown.castShadow=true;
+
+ scene.add(crown);
+}
+
+for(let z=75;z>-120;z-=22){
+
+ tree(-11.8,z+3);
+ tree(11.7,z-4);
+}
+
+/* =========================================================
+   CARS
+========================================================= */
+
+function car(x,z,color=0x4b5961,rot=0){
+
+ const g=new THREE.Group();
+
+ const body=box(
+  0,.55,0,
+  1.75,.55,3.7,
+  material(color,.55,.25),
+  false,
+  g
+ );
+
+ box(
+  0,1.02,-.25,
+  1.55,.65,1.8,
+  material(color,.55,.25),
+  false,
+  g
+ );
+
+ for(const sx of [-.88,.88]){
+  for(const sz of [-1.2,1.2]){
+
+   const wheel=
+    new THREE.Mesh(
+     new THREE.CylinderGeometry(
+      .33,.33,.22,14
+     ),
+     M.black
+    );
+
+   wheel.rotation.z=Math.PI/2;
+   wheel.position.set(
+    sx,.35,sz
+   );
+
+   g.add(wheel);
+  }
+ }
+
+ g.position.set(x,0,z);
+ g.rotation.y=rot;
+
+ scene.add(g);
+
+ return g;
+}
+
+const timelineCar=
+ car(
+  4.5,-29,
+  0x70423c,
+  0
+ );
+
+/* =========================================================
+   HOME — REAL OPENINGS
+========================================================= */
+
+const home=new THREE.Group();
+scene.add(home);
+
+/* floor */
+
+plane(
+ -18,.11,43,
+ 11,11,
+ M.wood
+);
+
+/* back */
+
+box(
+ -18,2.5,37.5,
+ 11,5,.3,
+ M.plaster,
+ true
+);
+
+/* left/right */
+
+box(
+ -23.5,2.5,43,
+ .3,5,11,
+ M.plaster,
+ true
+);
+
+box(
+ -12.5,2.5,43,
+ .3,5,11,
+ M.plaster,
+ true
+);
+
+/*
+ FRONT WALL:
+ left + right + section above door.
+ NO invisible wall across doorway.
+*/
+
+box(
+ -21.25,2.5,48.5,
+ 4.5,5,.3,
+ M.plaster,
+ true
+);
+
+box(
+ -14.75,2.5,48.5,
+ 4.5,5,.3,
+ M.plaster,
+ true
+);
+
+box(
+ -18,4.25,48.5,
+ 2,1.5,.3,
+ M.plaster,
+ true
+);
+
+/* actual door collider */
+
+const homeDoor=
+ box(
+  -18,1.25,48.55,
+  1.75,2.5,.14,
+  M.darkWood,
+  true
+ );
+
+/* roof */
+
+box(
+ -18,5.2,43,
+ 11.6,.35,11.6,
+ M.black
+);
+
+/* porch */
+
+box(
+ -18,.18,49.4,
+ 4,.35,2,
+ M.wood
+);
+
+cylinder(
+ -19.7,1.8,49.8,
+ .11,3.6,
+ M.wood
+);
+
+cylinder(
+ -16.3,1.8,49.8,
+ .11,3.6,
+ M.wood
+);
+
+const porchLight=
+ new THREE.PointLight(
+  0xffc37a,
+  13,
+  9
+ );
+
+porchLight.position.set(
+ -18,2.9,49.2
+);
+
+scene.add(porchLight);
+
+/* INTERIOR
+   deliberately open-plan enough
+   so VHS is ALWAYS reachable.
+*/
+
+/* kitchen counter */
+
+box(
+ -14.1,.55,39.2,
+ 2.4,1.1,.75,
+ M.wood,
+ true
+);
+
+/* couch */
+
+box(
+ -21,.52,40.3,
+ 2.7,.75,1,
+ M.green,
+ true
+);
+
+box(
+ -21,.95,39.85,
+ 2.7,.75,.2,
+ M.green
+);
+
+/* coffee table */
+
+box(
+ -19.5,.42,42.2,
+ 1.8,.18,.9,
+ M.wood,
+ true
+);
+
+/* VHS TABLE - ACCESSIBLE */
+
+const vhsTable=
+ box(
+  -15.2,.65,41,
+  1.8,.12,1,
+ M.wood,
+ true
+);
+
+for(const sx of [-.7,.7]){
+ for(const sz of [-.35,.35]){
+  box(
+   -15.2+sx,
+   .32,
+   41+sz,
+   .09,.65,.09,
+   M.darkWood
+  );
+ }
+}
+
+const tape1=
+ box(
+  -15.2,.77,41,
+  .75,.09,.43,
+  M.black
+);
+
+/* TV */
+
+const tv=
+ box(
+  -21.2,1.1,45.5,
+  1.7,1.25,.65,
+  M.black,
+  true
+);
+
+const tvScreen=
+ new THREE.Mesh(
+  new THREE.PlaneGeometry(
+   1.35,.9
+  ),
+  new THREE.MeshStandardMaterial({
+   color:0x172127,
+   emissive:0x0b1115,
+   emissiveIntensity:.4
+  })
+ );
+
+tvScreen.position.set(
+ -21.2,1.15,45.15
+);
+
+scene.add(tvScreen);
+
+/* physical paper map */
+
+const physicalMap=
+ new THREE.Group();
+
+const mapPaper=
+ box(
+ 0,0,0,
+ .9,.035,.65,
+ material(0xc9bc91,.95),
+ false,
+ physicalMap
+);
+
+box(
+ 0,.03,0,
+ .05,.02,.5,
+ M.darkMetal,
+ false,
+ physicalMap
+);
+
+box(
+ 0,.03,-.1,
+ .55,.02,.04,
+ M.darkMetal,
+ false,
+ physicalMap
+);
+
+physicalMap.position.set(
+ -14.5,.85,39.2
+);
+
+scene.add(physicalMap);
+
+/* =========================================================
+   CHARACTER MODEL
+========================================================= */
+
+function humanModel({
+ shirt=0x55506a,
+ pants=0x222b31,
+ hair=0x33251e
+}={}){
+
+ const g=new THREE.Group();
+
+ const shirtMat=material(shirt,.85);
+ const pantsMat=material(pants,.9);
+ const hairMat=material(hair,.9);
+
+ /* torso */
+
+ box(
+ 0,1.35,0,
+ .65,.9,.38,
+ shirtMat,
+ false,
+ g
+ );
+
+ /* neck */
+
+ cylinder(
+ 0,1.86,0,
+ .11,.2,
+ M.skin,
+ g
+ );
+
+ /* head */
+
+ sphere(
+ 0,2.12,0,
+ .26,
+ M.skin,
+ g
+ );
+
+ /* hair */
+
+ const hairMesh=
+  new THREE.Mesh(
+   new THREE.SphereGeometry(
+    .275,
+    16,10,
+    0,Math.PI*2,
+    0,Math.PI*.58
+   ),
+   hairMat
+  );
+
+ hairMesh.position.set(
+  0,2.22,0
+ );
+
+ g.add(hairMesh);
+
+ /* eyes */
+
+ for(const x of [-.085,.085]){
+
+  sphere(
+   x,2.14,-.245,
+   .025,
+   M.black,
+   g
+  );
+ }
+
+ /* arms */
+
+ for(const side of [-1,1]){
+
+  const arm=
+   box(
+    side*.43,
+    1.32,
+    0,
+    .18,.82,.18,
+    shirtMat,
+    false,
+    g
+   );
+
+  arm.rotation.z=
+   side*.04;
+
+  box(
+   side*.43,
+   .87,
+   0,
+   .17,.28,.17,
+   M.skin,
+   false,
+   g
+  );
+ }
+
+ /* legs */
+
+ for(const side of [-1,1]){
+
+  box(
+   side*.19,
+   .48,
+   0,
+   .22,.85,.27,
+   pantsMat,
+   false,
+   g
+  );
+
+  box(
+   side*.19,
+   .09,
+   -.11,
+   .25,.18,.48,
+   M.black,
+   false,
+   g
+  );
+ }
+
+ return g;
+}
+
+const maya=
+ humanModel({
+  shirt:0x594b69,
+  pants:0x24282e,
+  hair:0x2b211c
+ });
+
+maya.position.copy(LOC.MAYA);
+scene.add(maya);
+
+/* =========================================================
+   STATION
+========================================================= */
+
+plane(
+ 2,.04,-141,
+ 48,19,
+ M.concrete
+);
+
+/* station building */
+
+box(
+ 16,3,-145,
+ 18,6,10,
+ M.brick,
+ true
+);
+
+box(
+ 16,6.15,-145,
+ 19,.3,11,
+ M.black
+);
+
+/* fake entrance visual */
+
+box(
+ 16,1.6,-139.9,
+ 3.2,3.2,.12,
+ M.darkMetal
+);
+
+/* windows */
+
+for(let x=9;x<=23;x+=3.5){
+ windowPanel(
+  x,3,
+  -139.92,
+  1.8,2.1,
+  x===16
+ );
+}
+
+/* platform */
+
+plane(
+ -8,.13,-154,
+ 34,7,
+ M.concrete
+);
+
+box(
+ -8,.17,-157.35,
+ 34,.32,.35,
+ M.yellow
+);
+
+/* canopy */
+
+for(let x=-21;x<=5;x+=4.4){
+
+ cylinder(
+  x,1.8,-152.8,
+  .085,3.6,
+  M.darkMetal
+ );
+}
+
+box(
+ -8,3.7,-152.8,
+ 31,.22,5,
+ M.darkMetal
+);
+
+/* benches */
+
+for(const x of [-16,-8,0]){
+
+ box(
+  x,.65,-151.5,
+  2,.15,.55,
+  M.wood,
+  true
+ );
+
+ box(
+  x,1,-151.75,
+  2,.75,.12,
+  M.wood
+ );
+}
+
+/* tracks */
+
+for(const x of [-4.5,-7.5]){
+
+ box(
+  x,.08,-190,
+  .14,.14,90,
+  M.metal
+ );
+}
+
+for(let z=-147;z>-235;z-=1.25){
+
+ box(
+  -6,.03,z,
+  5,.12,.22,
+  M.darkWood
+ );
+}
+
+/* lockers */
+
+const lockers=[];
+
+for(let i=0;i<9;i++){
+
+ const locker=
+  box(
+   9+i*.72,
+   1.05,
+   -140.1,
+   .65,2.1,.55,
+   M.blue,
+   true
+  );
+
+ locker.userData.number=
+  312+i;
+
+ lockers.push(locker);
+}
+
+const locker317=
+ lockers[5];
+
+/* platform VHS */
+
+const tape2=
+ box(
+  -20.5,.27,-153,
+  .75,.09,.43,
+  M.black
+ );
+
+tape2.visible=false;
+
+/* tunnel */
+
+box(
+ -6,3.5,-229,
+  14,7,4,
+  M.concreteDark
+);
+
+const tunnelHole=
+ new THREE.Mesh(
+  new THREE.CircleGeometry(
+   4.5,24,
+   0,Math.PI
+  ),
+  M.black
+ );
+
+tunnelHole.rotation.z=Math.PI;
+tunnelHole.position.set(
+ -6,2.4,-226.95
+);
+
+scene.add(tunnelHole);
+
+/* =========================================================
+   TRAIN — DETAILED MODEL GENERATED IN HTML
+========================================================= */
+
+const train=
+ new THREE.Group();
+
+scene.add(train);
+
+train.visible=false;
+
+function trainBox(
+ x,y,z,w,h,d,
+ mat=M.trainCream
+){
+
+ return box(
+  x,y,z,
+  w,h,d,
+  mat,
+  false,
+  train
+ );
+}
+
+const carriageCenters=[];
+
+for(let car=0;car<4;car++){
+
+ const cz=car*13;
+
+ carriageCenters.push(cz);
+
+ /* chassis */
+
+ trainBox(
+  0,.38,cz,
+  4.4,.35,12,
+  M.darkMetal
+ );
+
+ /* floor */
+
+ trainBox(
+  0,.58,cz,
+  4.15,.15,11.7,
+  M.concreteDark
+ );
+
+ /* roof */
+
+ trainBox(
+  0,3.5,cz,
+  4.5,.28,12,
+  M.trainCream
+ );
+
+ /* side wall lower */
+
+ trainBox(
+  -2.05,1.15,cz,
+  .16,1.1,12,
+  M.trainRed
+ );
+
+ trainBox(
+  2.05,1.15,cz,
+  .16,1.1,12,
+  M.trainRed
+ );
+
+ /* upper wall strips */
+
+ trainBox(
+  -2.05,3.05,cz,
+  .16,.65,12,
+  M.trainCream
+ );
+
+ trainBox(
+  2.05,3.05,cz,
+  .16,.65,12,
+  M.trainCream
+ );
+
+ /* end walls */
+
+ trainBox(
+  0,2,cz-5.92,
+  4.2,2.9,.15,
+  M.trainCream
+ );
+
+ trainBox(
+  0,2,cz+5.92,
+  4.2,2.9,.15,
+  M.trainCream
+ );
+
+ /* windows */
+
+ for(let wz=-4;wz<=4;wz+=2){
+
+  for(const side of [-1,1]){
+
+   const window=
+    new THREE.Mesh(
+     new THREE.PlaneGeometry(
+      1.25,1.05
+     ),
+     GLASS
+    );
+
+   window.rotation.y=
+    side<0
+    ?Math.PI/2
+    :-Math.PI/2;
+
+   window.position.set(
+    side*2.135,
+    2.25,
+    cz+wz
+   );
+
+   train.add(window);
+  }
+ }
+
+ /* seats */
+
+ for(let sz=-4;sz<=4;sz+=2.15){
+
+  for(const side of [-1,1]){
+
+   trainBox(
+    side*1.15,
+    .95,
+    cz+sz,
+    1.1,.75,.8,
+    M.seat
+   );
+
+   trainBox(
+    side*1.15,
+    1.42,
+    cz+sz+.32,
+    1.1,.75,.14,
+    M.seat
+   );
+  }
+ }
+
+ /* luggage shelves */
+
+ trainBox(
+  -1.65,2.85,cz,
+  .75,.1,9.5,
+  M.metal
+ );
+
+ trainBox(
+  1.65,2.85,cz,
+  .75,.1,9.5,
+  M.metal
+ );
+
+ /* ceiling lights */
+
+ for(let l=-4;l<=4;l+=4){
+
+  const lamp=
+   new THREE.PointLight(
+    0xffe2a7,
+    5,
+    8
+   );
+
+  lamp.position.set(
+   0,3.2,cz+l
+  );
+
+  train.add(lamp);
+ }
+
+ /* wheels */
+
+ for(const wz of [-3.8,3.8]){
+
+  for(const side of [-1,1]){
+
+   const wheel=
+    new THREE.Mesh(
+     new THREE.CylinderGeometry(
+      .42,.42,.25,16
+     ),
+     M.black
+    );
+
+   wheel.rotation.z=
+    Math.PI/2;
+
+   wheel.position.set(
+    side*1.8,
+    .25,
+    cz+wz
+   );
+
+   train.add(wheel);
+  }
+ }
+}
+
+/* locomotive/cab */
+
+trainBox(
+ 0,1.8,-7,
+ 4.4,3,2.3,
+ M.trainRed
+);
+
+trainBox(
+ 0,3.45,-7,
+ 4.5,.3,2.4,
+ M.trainCream
+);
+
+/* headlights */
+
+for(const x of [-1.2,1.2]){
+
+ const light=
+  new THREE.PointLight(
+   0xfff0c8,
+   25,
+   30,
+   2
+  );
+
+ light.position.set(
+  x,1.3,-8.2
+ );
+
+ train.add(light);
+
+ sphere(
+  x,1.3,-8.18,
+  .16,
+  new THREE.MeshBasicMaterial({
+   color:0xfff0c8
+  }),
+  train
+ );
+}
+
+/* compartment 317 sign */
+
+const sign317=
+ trainBox(
+ 0,2.4,26,
+ 1,.4,.06,
+ M.yellow
+);
+
+/* =========================================================
+   FIRST PERSON BODY
+========================================================= */
+
+const fpRig=
+ new THREE.Group();
+
+camera.add(fpRig);
+scene.add(camera);
+
+function createArm(side){
+
+ const g=
+  new THREE.Group();
+
+ const sleeve=
+  box(
+   0,-.18,0,
+   .25,.5,.28,
+   M.darkMetal,
+   false,
+   g
+  );
+
+ const forearm=
+  box(
+   0,-.53,-.02,
+   .21,.4,.22,
+   M.skin,
+   false,
+   g
+  );
+
+ const hand=
+  box(
+   0,-.78,-.06,
+   .22,.2,.25,
+   M.skin,
+   false,
+   g
+  );
+
+ /* fingers */
+
+ for(let i=0;i<4;i++){
+
+  box(
+   -.075+i*.05,
+   -.88,
+   -.13,
+   .035,.18,.04,
+   M.skin,
+   false,
+   g
+  );
+ }
+
+ g.position.set(
+  side*.48,
+  -.42,
+  -.88
+ );
+
+ g.rotation.x=-.38;
+
+ return g;
+}
+
+const armL=createArm(-1);
+const armR=createArm(1);
+
+fpRig.add(armL,armR);
+
+function createLeg(side){
+
+ const g=
+  new THREE.Group();
+
+ box(
+  0,-.4,0,
+  .32,.8,.35,
+  M.jeans,
+  false,
+  g
+ );
+
+ box(
+  0,-.85,-.15,
+  .36,.2,.65,
+  M.black,
+  false,
+  g
+ );
+
+ g.position.set(
+  side*.19,
+  -1.2,
+  -.02
+ );
+
+ return g;
+}
+
+const legL=createLeg(-1);
+const legR=createLeg(1);
+
+fpRig.add(legL,legR);
+
+/* =========================================================
+   FLASHLIGHT PHYSICAL MODEL
+========================================================= */
+
+const flashlightModel=
+ new THREE.Group();
+
+flashlightModel.position.set(
+ .48,-.63,-.88
+);
+
+fpRig.add(flashlightModel);
+
+/* grip */
+
+const flashGrip=
+ new THREE.Mesh(
+  new THREE.CylinderGeometry(
+   .065,.08,.35,16
+  ),
+  M.black
+ );
+
+flashGrip.rotation.x=
+ Math.PI/2;
+
+flashlightModel.add(flashGrip);
+
+/* head */
+
+const flashHead=
+ new THREE.Mesh(
+  new THREE.CylinderGeometry(
+   .13,.08,.14,16
+  ),
+  M.metal
+ );
+
+flashHead.rotation.x=
+ Math.PI/2;
+
+flashHead.position.z=-.23;
+
+flashlightModel.add(flashHead);
+
+/* glass */
+
+const flashGlass=
+ new THREE.Mesh(
+  new THREE.CircleGeometry(
+   .1,16
+  ),
+  new THREE.MeshBasicMaterial({
+   color:0xfff1c8
+  })
+ );
+
+flashGlass.position.z=-.305;
+flashlightModel.add(flashGlass);
+
+/* switch */
+
+box(
+ 0,.085,.05,
+ .06,.035,.09,
+ M.red,
+ false,
+ flashlightModel
+);
+
+const flashlight=
+ new THREE.SpotLight(
+  0xfff0ce,
+  48,
+  38,
+  Math.PI/7,
+  .42,
+  1.4
+ );
+
+flashlight.position.set(
+ .45,-.55,-.85
+);
+
+flashlight.target.position.set(
+ .1,-.2,-9
+);
+
+camera.add(
+ flashlight,
+ flashlight.target
+);
+
+function refreshFlashlight(){
+
+ const active=
+  state.flashlight&&
+  state.battery>0;
+
+ flashlight.visible=active;
+ flashlightModel.visible=active;
+}
+
+refreshFlashlight();
+
+/* =========================================================
+   AUDIO ENGINE
+========================================================= */
+
+let audioContext=null;
+let master=null;
+let ambience=null;
+let effects=null;
+
+let lastStep=0;
+
+function initAudio(){
+
+ if(audioContext)return;
+
+ audioContext=
+  new(
+   window.AudioContext||
+   window.webkitAudioContext
+  )();
+
+ master=
+  audioContext.createGain();
+
+ ambience=
+  audioContext.createGain();
+
+ effects=
+  audioContext.createGain();
+
+ master.gain.value=.72;
+ ambience.gain.value=.7;
+ effects.gain.value=.95;
+
+ ambience.connect(master);
+ effects.connect(master);
+ master.connect(audioContext.destination);
+
+ createNoiseLoop(
+  .07,
+  900,
+  7000
+ );
+
+ createNoiseLoop(
+  .025,
+  60,
+  450
+ );
+
+ const hum=
+  audioContext.createOscillator();
+
+ const hg=
+  audioContext.createGain();
+
+ hum.frequency.value=60;
+ hg.gain.value=.005;
+
+ hum.connect(hg);
+ hg.connect(ambience);
+
+ hum.start();
+}
+
+function noiseBuffer(seconds){
+
+ const buffer=
+  audioContext.createBuffer(
+   1,
+   audioContext.sampleRate*seconds,
+   audioContext.sampleRate
+  );
+
+ const data=
+  buffer.getChannelData(0);
+
+ for(let i=0;i<data.length;i++){
+  data[i]=Math.random()*2-1;
+ }
+
+ return buffer;
+}
+
+function createNoiseLoop(
+ volume,
+ minFreq,
+ maxFreq
+){
+
+ const src=
+  audioContext.createBufferSource();
+
+ src.buffer=
+  noiseBuffer(4);
+
+ src.loop=true;
+
+ const hp=
+  audioContext.createBiquadFilter();
+
+ hp.type="highpass";
+ hp.frequency.value=minFreq;
+
+ const lp=
+  audioContext.createBiquadFilter();
+
+ lp.type="lowpass";
+ lp.frequency.value=maxFreq;
+
+ const gain=
+  audioContext.createGain();
+
+ gain.gain.value=volume;
+
+ src.connect(hp);
+ hp.connect(lp);
+ lp.connect(gain);
+ gain.connect(ambience);
+
+ src.start();
+}
+
+function clickSound(){
+
+ if(!audioContext)return;
+
+ const o=
+  audioContext.createOscillator();
+
+ const g=
+  audioContext.createGain();
+
+ const now=
+  audioContext.currentTime;
+
+ o.frequency.value=900;
+
+ g.gain.setValueAtTime(
+  .04,now
+ );
+
+ g.gain.exponentialRampToValueAtTime(
+  .0001,
+  now+.035
+ );
+
+ o.connect(g);
+ g.connect(effects);
+
+ o.start();
+ o.stop(now+.04);
+}
+
+function stepSound(run=false){
+
+ if(!audioContext)return;
+
+ const now=
+  audioContext.currentTime;
+
+ if(
+  now-lastStep<
+  (run?.22:.34)
+ )return;
+
+ lastStep=now;
+
+ const src=
+  audioContext.createBufferSource();
+
+ src.buffer=
+  noiseBuffer(.08);
+
+ const lp=
+  audioContext.createBiquadFilter();
+
+ lp.type="lowpass";
+ lp.frequency.value=
+  400+Math.random()*160;
+
+ const gain=
+  audioContext.createGain();
+
+ gain.gain.setValueAtTime(
+  run?.15:.1,
+  now
+ );
+
+ gain.gain.exponentialRampToValueAtTime(
+  .0001,
+  now+.09
+ );
+
+ src.connect(lp);
+ lp.connect(gain);
+ gain.connect(effects);
+
+ src.start();
+}
+
+function staticSound(seconds=.5){
+
+ if(!audioContext)return;
+
+ const src=
+  audioContext.createBufferSource();
+
+ src.buffer=
+  noiseBuffer(seconds);
+
+ const bp=
+  audioContext.createBiquadFilter();
+
+ bp.type="bandpass";
+ bp.frequency.value=3000;
+
+ const gain=
+  audioContext.createGain();
+
+ gain.gain.setValueAtTime(
+  .14,
+  audioContext.currentTime
+ );
+
+ gain.gain.exponentialRampToValueAtTime(
+  .0001,
+  audioContext.currentTime+seconds
+ );
+
+ src.connect(bp);
+ bp.connect(gain);
+ gain.connect(effects);
+
+ src.start();
+}
+
+function rumble(seconds=7){
+
+ if(!audioContext)return;
+
+ const src=
+  audioContext.createBufferSource();
+
+ src.buffer=
+  noiseBuffer(seconds);
+
+ const lp=
+  audioContext.createBiquadFilter();
+
+ lp.type="lowpass";
+ lp.frequency.value=150;
+
+ const gain=
+  audioContext.createGain();
+
+ const now=
+  audioContext.currentTime;
+
+ gain.gain.setValueAtTime(
+  .0001,
+  now
+ );
+
+ gain.gain.linearRampToValueAtTime(
+  .3,
+  now+1.8
+ );
+
+ gain.gain.setValueAtTime(
+  .3,
+  now+seconds-1.5
+ );
+
+ gain.gain.exponentialRampToValueAtTime(
+  .0001,
+  now+seconds
+ );
+
+ src.connect(lp);
+ lp.connect(gain);
+ gain.connect(effects);
+
+ src.start();
+}
+
+/* =========================================================
+   WAYPOINT
+========================================================= */
+
+let waypoint=null;
+
+const wp3d=
+ new THREE.Group();
+
+const wpRing=
+ new THREE.Mesh(
+  new THREE.TorusGeometry(
+   .8,.07,10,28
+  ),
+  new THREE.MeshBasicMaterial({
+   color:0xffd743
+  })
+ );
+
+wpRing.rotation.x=
+ Math.PI/2;
+
+wp3d.add(wpRing);
+
+const wpDiamond=
+ new THREE.Mesh(
+  new THREE.OctahedronGeometry(.3),
+  new THREE.MeshBasicMaterial({
+   color:0xffd743
+  })
+ );
+
+wpDiamond.position.y=2.1;
+
+wp3d.add(wpDiamond);
+scene.add(wp3d);
+
+wp3d.visible=false;
+
+function setWaypoint(name,pos){
+
+ waypoint={
+  name,
+  pos:pos.clone()
+ };
+
+ wp3d.position.copy(pos);
+ wp3d.visible=true;
+
+ $("#waypoint").style.display=
+  "block";
+}
+
+function clearWaypoint(){
+
+ waypoint=null;
+ wp3d.visible=false;
+
+ $("#waypoint").style.display=
+  "none";
+}
+
+function updateWaypoint(dt){
+
+ if(!waypoint)return;
+
+ wpDiamond.rotation.y+=
+  dt*2;
+
+ wpDiamond.position.y=
+  2.1+
+  Math.sin(
+   performance.now()*.003
+  )*.18;
+
+ const distance=
+  horizontalDistance(
+   player.pos,
+   waypoint.pos
+  );
+
+ $("#wpName").textContent=
+  waypoint.name;
+
+ $("#wpDistance").textContent=
+  Math.round(distance)+" m";
+
+ const p=
+  waypoint.pos.clone();
+
+ p.y+=2.4;
+
+ p.project(camera);
+
+ let x=
+  (p.x*.5+.5)*innerWidth;
+
+ let y=
+  (-p.y*.5+.5)*innerHeight;
+
+ x=Math.max(
+  60,
+  Math.min(
+   innerWidth-60,
+   x
+  )
+ );
+
+ y=Math.max(
+  60,
+  Math.min(
+   innerHeight-60,
+   y
+  )
+ );
+
+ $("#waypoint").style.left=
+  x+"px";
+
+ $("#waypoint").style.top=
+  y+"px";
+}
+
+/* =========================================================
+   UI
+========================================================= */
+
+let notificationTimer=null;
+
+function objective(text){
+
+ $("#objectiveText").textContent=
+  text;
+}
+
+function notify(text,time=3000){
+
+ $("#notification").textContent=
+  text;
+
+ $("#notification").style.opacity=1;
+
+ clearTimeout(
+  notificationTimer
+ );
+
+ notificationTimer=
+  setTimeout(()=>{
+   $("#notification").style.opacity=0;
+  },time);
+}
+
+function showArea(name,sub){
+
+ const el=
+  $("#areaName");
+
+ el.querySelector("strong")
+  .textContent=name;
+
+ el.querySelector("span")
+  .textContent=sub;
+
+ el.style.opacity=1;
+
+ setTimeout(()=>{
+  el.style.opacity=0;
+ },3500);
+}
+
+async function chapter(
+ small,
+ big
+){
+
+ $("#chapterSmall").textContent=
+  small;
+
+ $("#chapterBig").textContent=
+  big;
+
+ $("#chapter").style.display=
+  "flex";
+
+ await wait(2300);
+
+ $("#chapter").style.display=
+  "none";
+}
+
+async function fadeTeleport(position){
+
+ $("#fade").style.opacity=1;
+
+ await wait(650);
+
+ player.pos.copy(position);
+
+ await wait(150);
+
+ $("#fade").style.opacity=0;
+}
+
+/* =========================================================
+   DIALOGUE
+========================================================= */
+
+let dialogueQueue=[];
+let dialogueCallback=null;
+
+function dialogue(lines,callback=null){
+
+ if(dialogueActive)return;
+
+ dialogueActive=true;
+
+ dialogueQueue=
+  [...lines];
+
+ dialogueCallback=
+  callback;
+
+ $("#subtitle").style.display=
+  "block";
+
+ nextDialogue();
+}
+
+function nextDialogue(){
+
+ if(!dialogueQueue.length){
+
+  dialogueActive=false;
+
+  $("#subtitle").style.display=
+   "none";
+
+  if(dialogueCallback){
+
+   const cb=
+    dialogueCallback;
+
+   dialogueCallback=null;
+
+   cb();
+  }
+
+  return;
+ }
+
+ const line=
+  dialogueQueue.shift();
+
+ $("#speaker").textContent=
+  line[0];
+
+ $("#subtitleText").textContent=
+  line[1];
+}
+
+/* =========================================================
+   QUESTS
+========================================================= */
+
+const Q={};
+
+Q.INTRO_MAYA={
+ text:"Porozmawiaj z Mayą.",
+ waypoint:[
+  "MAYA",
+  LOC.MAYA
+ ]
+};
+
+Q.GO_HOME={
+ text:"Wróć do rodzinnego domu.",
+ waypoint:[
+  "DOM WALKERÓW",
+  LOC.HOME_GATE
+ ]
+};
+
+Q.OPEN_HOME={
+ text:"Otwórz drzwi domu.",
+ waypoint:[
+  "DRZWI",
+  LOC.HOME_DOOR
+ ]
+};
+
+Q.GET_VHS={
+ text:"Sprawdź kasetę VHS w salonie.",
+ waypoint:[
+  "KASETA VHS",
+  LOC.HOME_VHS
+ ]
+};
+
+Q.GET_MAP={
+ text:"Weź mapę Greyfield ze stołu."
+};
+
+Q.GO_STATION={
+ text:"Spotkaj się z Mayą na stacji.",
+ waypoint:[
+  "GREYFIELD CENTRAL",
+  LOC.STATION
+ ]
+};
+
+Q.PLATFORM={
+ text:"Idź na peron 2.",
+ waypoint:[
+  "PERON 2",
+  LOC.PLATFORM
+ ]
+};
+
+Q.FIND_TAPE2={
+ text:"Sprawdź koniec peronu.",
+ waypoint:[
+  "KONIEC PERONU",
+  LOC.PLATFORM_END
+ ]
+};
+
+Q.WAIT_TRAIN={
+ text:"Wróć pod zadaszenie peronu 2.",
+ waypoint:[
+  "TOR 2",
+  LOC.PLATFORM
+ ]
+};
+
+Q.BOARD={
+ text:"Wejdź do pociągu 117."
+};
+
+Q.TRAIN_WAGON1={
+ text:"Przejdź przez pierwszy wagon."
+};
+
+Q.TRAIN_1981={
+ text:"Sprawdź drugi wagon."
+};
+
+Q.TRAIN_317={
+ text:"Znajdź przedział 317."
+};
+
+Q.TRAIN_CAB={
+ text:"Dostań się do kabiny."
+};
+
+Q.SWITCH={
+ text:"Przestaw zwrotnicę na tor B."
+};
+
+Q.NEW_GREYFIELD={
+ text:"Sprawdź zmienione Greyfield."
+};
+
+Q.MILNERS={
+ text:"Sprawdź sklep Miller's.",
+ waypoint:[
+  "MILLER'S MARKET",
+  LOC.MILLERS
+ ]
+};
+
+Q.RETURN_HOME={
+ text:"Wróć do domu.",
+ waypoint:[
+  "DOM",
+  LOC.HOME_GATE
+ ]
+};
+
+Q.PHOTO={
+ text:"Sprawdź rodzinne zdjęcie."
+};
+
+Q.PHONE={
+ text:"Odbierz telefon."
+};
+
+Q.FINAL_STATION={
+ text:"Wróć na stację przed 03:17.",
+ waypoint:[
+  "GREYFIELD CENTRAL",
+  LOC.STATION
+ ]
+};
+
+Q.FINAL_TRAIN={
+ text:"Znajdź pociąg 117."
+};
+
+function setQuest(id){
+
+ state.quest=id;
+
+ clearWaypoint();
+
+ const q=Q[id];
+
+ if(!q){
+
+  objective(
+   "Nieznany etap: "+id
+  );
+
+  return;
+ }
+
+ objective(q.text);
+
+ if(q.waypoint){
+
+  setWaypoint(
+   q.waypoint[0],
+   q.waypoint[1]
+  );
+ }
+
+ saveGame();
+}
+
+/* =========================================================
+   INTERACTION SYSTEM
+========================================================= */
+
+function addInteraction(
+ object,
+ range,
+ text,
+ action,
+ condition=()=>true
+){
+
+ interactions.push({
+  object,
+  range,
+  text,
+  action,
+  condition
+ });
+}
+
+function objectPosition(object){
+
+ const p=
+  new THREE.Vector3();
+
+ object.getWorldPosition(p);
+
+ return p;
+}
+
+function nearestInteraction(){
+
+ let best=null;
+ let bestDistance=999;
+
+ const forward=
+  new THREE.Vector3(
+   -Math.sin(yaw),
+   0,
+   -Math.cos(yaw)
+  );
+
+ for(const item of interactions){
+
+  if(
+   !item.object||
+   !item.object.visible||
+   !item.condition()
+  )continue;
+
+  const p=
+   objectPosition(item.object);
+
+  const d=
+   horizontalDistance(
+    player.pos,p
+   );
+
+  if(d>item.range)continue;
+
+  const dir=
+   new THREE.Vector3(
+    p.x-player.pos.x,
+    0,
+    p.z-player.pos.z
+   ).normalize();
+
+  if(
+   dir.dot(forward)<-.2
+  )continue;
+
+  if(d<bestDistance){
+
+   bestDistance=d;
+   best=item;
+  }
+ }
+
+ return best;
+}
+
+function interact(){
+
+ initAudio();
+
+ if(dialogueActive){
+
+  nextDialogue();
+  return;
+ }
+
+ if(mapOpen){
+
+  toggleMap();
+  return;
+ }
+
+ const item=
+  nearestInteraction();
+
+ if(item)
+  item.action();
+}
+
+function updateInteraction(){
+
+ if(
+  dialogueActive||
+  mapOpen
+ ){
+
+  $("#interaction").style.opacity=0;
+  return;
+ }
+
+ const item=
+  nearestInteraction();
+
+ if(item){
+
+  $("#interaction").textContent=
+   item.text;
+
+  $("#interaction").style.opacity=1;
+
+ }else{
+
+  $("#interaction").style.opacity=0;
+ }
+}
+
+/* =========================================================
+   STORY INTERACTIONS
+========================================================= */
+
+/* MAYA */
+
+addInteraction(
+ maya,
+ 2.5,
+ "E  POROZMAWIAJ",
+ ()=>{
+
+  if(state.quest==="INTRO_MAYA"){
+
+   dialogue([
+    ["MAYA","Alex?"],
+    ["ALEX","Cześć, Maya."],
+    ["MAYA","Nie wierzę. Naprawdę wróciłeś."],
+    ["ALEX","Na jedną noc."],
+    ["MAYA","Greyfield nie lubi ludzi, którzy mówią 'na jedną noc'."],
+    ["ALEX","Nadal opowiadasz takie rzeczy?"],
+    ["MAYA","Od kilku dni telefony dzwonią bez powodu."],
+    ["ALEX","Stara centrala."],
+    ["MAYA","Nie. Wczoraj odebrałam."],
+    ["ALEX","I?"],
+    ["MAYA","Usłyszałam rozmowę, którą odbyłam godzinę później."],
+    ["ALEX","Bardzo śmieszne."],
+    ["MAYA","Nie żartuję."],
+    ["MAYA","Idź do domu. Potem spotkamy się na stacji."]
+   ],()=>setQuest("GO_HOME"));
+  }
+ }
+);
+
+/* HOME DOOR */
+
+addInteraction(
+ homeDoor,
+ 2.1,
+ "E  OTWÓRZ",
+ ()=>{
+
+  if(state.quest!=="OPEN_HOME")
+   return;
+
+  const collider=
+   homeDoor.userData.collider;
+
+  if(collider)
+   collider.enabled=false;
+
+  homeDoor.rotation.y=
+   -Math.PI*.43;
+
+  homeDoor.position.x-=.65;
+
+  setQuest("GET_VHS");
+ },
+ ()=>state.quest==="OPEN_HOME"
+);
+
+/* VHS */
+
+addInteraction(
+ tape1,
+ 1.9,
+ "E  WEŹ VHS",
+ ()=>{
+
+  tape1.visible=false;
+
+  playVHS1();
+ },
+ ()=>state.quest==="GET_VHS"
+);
+
+/* MAP */
+
+addInteraction(
+ physicalMap,
+ 2,
+ "E  WEŹ MAPĘ",
+ ()=>{
+
+  state.hasMap=true;
+
+  physicalMap.visible=false;
+
+  notify(
+   "MAPA GREYFIELD • M / MAPA"
+  );
+
+  setQuest("GO_STATION");
+ },
+ ()=>(
+  !state.hasMap&&
+  (
+   state.quest==="GET_MAP"||
+   state.quest==="GO_STATION"
+  )
+ )
+);
+
+/* VHS2 */
+
+addInteraction(
+ tape2,
+ 2,
+ "E  WEŹ VHS",
+ ()=>{
+
+  tape2.visible=false;
+
+  playVHS2();
+ },
+ ()=>state.quest==="FIND_TAPE2"
+);
+
+/* =========================================================
+   VHS
+========================================================= */
+
+async function vhsSequence(lines){
+
+ playing=false;
+
+ $("#vhs").style.display=
+  "block";
+
+ staticSound(.5);
+
+ for(const line of lines){
+
+  $("#vhsTop").textContent=
+   line.top||"PLAY ▶";
+
+  $("#vhsBig").textContent=
+   line.big;
+
+  $("#vhsSmall").textContent=
+   line.small||"";
+
+  await wait(
+   line.time||1500
+  );
+ }
+
+ staticSound(.6);
+
+ $("#vhs").style.display=
+  "none";
+
+ playing=true;
+}
+
+async function playVHS1(){
+
+ await vhsSequence([
+  {
+   top:"PLAY ▶ 03:16:41",
+   big:"CAM 04",
+   small:"19 OCT 1997"
+  },
+  {
+   big:"HAWTHORNE STREET",
+   small:"03:16:53"
+  },
+  {
+   big:"MOTION DETECTED",
+   small:"03:17:04"
+  },
+  {
+   big:"ALEX WALKER",
+   small:"SUBJECT IDENTIFIED"
+  },
+  {
+   big:"LOOK AT THE ROAD",
+   small:"03:17:15"
+  }
+ ]);
+
+ dialogue([
+  ["ALEX","19 października."],
+  ["ALEX","Jest dopiero osiemnasty."],
+  ["ALEX","I to byłem ja."]
+ ],()=>{
+
+  setQuest("GET_MAP");
+
+  notify(
+   "Na stole leży stara mapa Greyfield."
+  );
+ });
+}
+
+async function playVHS2(){
+
+ await vhsSequence([
+  {
+   top:"PLAY ▶ 01:51:38",
+   big:"GREYFIELD CENTRAL",
+   small:"PLATFORM 2"
+  },
+  {
+   big:"TRAIN 117",
+   small:"UNSCHEDULED SERVICE"
+  },
+  {
+   big:"ORIGIN",
+   small:"GREYFIELD"
+  },
+  {
+   big:"DESTINATION",
+   small:"GREYFIELD"
+  },
+  {
+   big:"PASSENGERS",
+   small:"2"
+  },
+  {
+   big:"ARRIVAL",
+   small:"01:52"
+  },
+  {
+   big:"DO NOT MISS THE TRAIN",
+   small:""
+  }
+ ]);
+
+ dialogue([
+  ["MAYA","To moja kaseta."],
+  ["ALEX","Pociąg 117."],
+  ["MAYA","Nie istnieje taki kurs."],
+  ["ALEX","Za chwilę się przekonamy."]
+ ],()=>setQuest("WAIT_TRAIN"));
+}
+
+/* =========================================================
+   PROXIMITY STORY
+========================================================= */
+
+function fireOnce(name,fn){
+
+ if(state.flags[name])
+  return;
+
+ state.flags[name]=true;
+
+ fn();
+
+ saveGame();
+}
+
+function updateStory(){
+
+ if(!playing)return;
+
+ if(
+  state.quest==="GO_HOME"&&
+  horizontalDistance(
+   player.pos,
+   LOC.HOME_GATE
+  )<4
+ ){
+
+  fireOnce(
+   "homeArrival",
+   ()=>{
+
+    showArea(
+     "Hawthorne Street",
+     "DOM WALKERÓW"
+    );
+
+    setQuest("OPEN_HOME");
+   }
+  );
+ }
+
+ if(
+  state.quest==="GO_STATION"&&
+  horizontalDistance(
+   player.pos,
+   LOC.STATION
+  )<7
+ ){
+
+  fireOnce(
+   "stationMeet",
+   ()=>{
+
+    maya.position.set(
+     1,0,-137
+    );
+
+    showArea(
+     "Greyfield Central",
+     "OTWARTO W 1911"
+    );
+
+    dialogue([
+     ["MAYA","Znalazłeś coś?"],
+     ["ALEX","Kasetę z jutrzejszą datą."],
+     ["MAYA","Ja też."],
+     ["ALEX","Gdzie jest?"],
+     ["MAYA","Była tutaj. Na peronie."],
+     ["ALEX","Była?"],
+     ["MAYA","Zniknęła po tym, jak ją obejrzałam."],
+     ["ALEX","Co pokazywała?"],
+     ["MAYA","Nas. I pociąg."],
+     ["ALEX","Jaki pociąg?"],
+     ["MAYA","Taki, który nie powinien przyjechać."]
+    ],()=>setQuest("PLATFORM"));
+   }
+  );
+ }
+
+ if(
+  state.quest==="PLATFORM"&&
+  horizontalDistance(
+   player.pos,
+   LOC.PLATFORM
+  )<5
+ ){
+
+  fireOnce(
+   "platformArrival",
+   ()=>{
+
+    rumble(5);
+
+    dialogue([
+     ["MAYA","Słyszysz?"],
+     ["ALEX","Pociąg."],
+     ["MAYA","Tunel jest zamknięty od lat."],
+     ["ALEX","Coś leży na końcu peronu."]
+    ],()=>{
+
+     tape2.visible=true;
+
+     setQuest(
+      "FIND_TAPE2"
+     );
+    });
+   }
+  );
+ }
+
+ if(
+  state.quest==="WAIT_TRAIN"&&
+  horizontalDistance(
+   player.pos,
+   LOC.PLATFORM
+  )<5
+ ){
+
+  fireOnce(
+   "trainArrival",
+   trainArrival
+  );
+ }
+
+ if(
+  state.quest==="MILNERS"&&
+  horizontalDistance(
+   player.pos,
+   LOC.MILLERS
+  )<8
+ ){
+
+  fireOnce(
+   "milnersArrival",
+   changedShopScene
+  );
+ }
+
+ if(
+  state.quest==="RETURN_HOME"&&
+  horizontalDistance(
+   player.pos,
+   LOC.HOME_GATE
+  )<5
+ ){
+
+  fireOnce(
+   "changedHome",
+   changedHomeScene
+  );
+ }
+}
+
+/* =========================================================
+   TRAIN ARRIVAL
+========================================================= */
+
+async function trainArrival(){
+
+ clearWaypoint();
+
+ objective(
+  "Coś nadjeżdża z tunelu..."
+ );
+
+ train.visible=true;
+
+ train.position.set(
+  -6,0,-238
+ );
+
+ rumble(10);
+
+ for(let i=0;i<210;i++){
+
+  train.position.z+=
+   .39;
+
+  await wait(12);
+ }
+
+ train.position.z=-156;
+
+ dialogue([
+  ["MAYA","117."],
+  ["ALEX","Nie ma go w rozkładzie."],
+  ["MAYA","Nie ma też maszynisty."],
+  ["ALEX","Tablica kierunkowa mówi Greyfield."],
+  ["MAYA","Jesteśmy w Greyfield."],
+  ["ALEX","Wiem."],
+  ["MAYA","Jedne drzwi są otwarte."]
+ ],()=>{
+
+  setQuest("BOARD");
+
+  setWaypoint(
+   "POCIĄG 117",
+   new THREE.Vector3(
+    -3.9,0,-154
+   )
+  );
+ });
+}
+
+/* train entry interaction anchor */
+
+const trainEntry=
+ new THREE.Object3D();
+
+trainEntry.position.set(
+ -3.8,1,-154
+);
+
+scene.add(trainEntry);
+
+addInteraction(
+ trainEntry,
+ 2.2,
+ "E  WEJDŹ DO POCIĄGU",
+ ()=>boardTrain(),
+ ()=>state.quest==="BOARD"
+);
+
+async function boardTrain(){
+
+ clearWaypoint();
+
+ await fadeTeleport(
+  new THREE.Vector3(
+   -6,
+   1.72,
+   -155
+  )
+ );
+
+ state.train=true;
+
+ await chapter(
+  "ROZDZIAŁ III",
+  "POCIĄG 117"
+ );
+
+ dialogue([
+  ["MAYA","Drzwi się zamknęły."],
+  ["ALEX","Nie dotknęliśmy ich."],
+  ["MAYA","Spójrz na gazetę."],
+  ["ALEX","19 października 1981."],
+  ["MAYA","Ten wagon ma szesnaście lat."]
+ ],()=>{
+
+  setQuest(
+   "TRAIN_WAGON1"
+  );
+
+  runTrainStory();
+ });
+}
+
+/* =========================================================
+   TRAIN STORY
+========================================================= */
+
+async function runTrainStory(){
+
+ state.train=true;
+
+ rumble(15);
+
+ await wait(3500);
+
+ dialogue([
+  ["MAYA","Za oknem zniknęła stacja."],
+  ["ALEX","Nie jedziemy aż tak szybko."],
+  ["MAYA","Więc dlaczego nie ma Greyfield?"],
+  ["ALEX","Idziemy dalej."]
+ ],async()=>{
+
+  setQuest("TRAIN_1981");
+
+  await wait(4000);
+
+  dialogue([
+   ["MAYA","Spójrz przez okno."],
+   ["ALEX","To Greyfield."],
+   ["MAYA","Nie nasze."],
+   ["ALEX","Nie ma kina."],
+   ["MAYA","Bo to jest 1981."]
+  ],async()=>{
+
+   await wait(3500);
+
+   setQuest("TRAIN_317");
+
+   dialogue([
+    ["ALEX","Każdy wagon pokazuje coś innego."],
+    ["MAYA","Nie tylko inny rok."],
+    ["ALEX","Co?"],
+    ["MAYA","W pierwszym wagonie szkoła była po lewej stronie ulicy."],
+    ["ALEX","Zawsze była po prawej."],
+    ["MAYA","Dla ciebie."]
+   ],async()=>{
+
+    await wait(3500);
+
+    dialogue([
+     ["MAYA","Alex."],
+     ["ALEX","Co?"],
+     ["MAYA","Drzwi 317."],
+     ["ALEX","Jak szafka na stacji."],
+     ["MAYA","Otwórz."]
+    ],thirdTape);
+   });
+  });
+ });
+}
+
+async function thirdTape(){
+
+ await vhsSequence([
+  {
+   top:"PLAY ▶ 03:16:57",
+   big:"TRAIN 117",
+   small:"FRONT CAMERA"
+  },
+  {
+   big:"HAWTHORNE CROSSING",
+   small:"03:17:08"
+  },
+  {
+   big:"SWITCH",
+   small:"POSITION A"
+  },
+  {
+   big:"ALEX WALKER",
+   small:"CABIN"
+  },
+  {
+   big:"CHANGE THE SWITCH",
+   small:"BEFORE 03:17"
+  }
+ ]);
+
+ dialogue([
+  ["MAYA","Hawthorne Street."],
+  ["ALEX","Mój dom."],
+  ["MAYA","Pierwsza kaseta i ta pokazują to samo zdarzenie."],
+  ["ALEX","Z dwóch różnych kamer."],
+  ["MAYA","A ty jesteś w kabinie."],
+  ["ALEX","Muszę dostać się do przodu."]
+ ],()=>{
+
+  setQuest("TRAIN_CAB");
+
+  setTimeout(
+   switchScene,
+   4500
+  );
+ });
+}
+
+function switchScene(){
+
+ dialogue([
+  ["MAYA","Alex!"],
+  ["ALEX","Co?"],
+  ["MAYA","Tory rozdzielają się przed nami."],
+  ["ALEX","Zwrotnica."],
+  ["MAYA","Na kasecie była ustawiona na A."],
+  ["ALEX","Więc ustawiam B."]
+ ],()=>{
+
+  setQuest("SWITCH");
+
+  setTimeout(
+   changeTimeline,
+   1800
+  );
+ });
+}
+
+async function changeTimeline(){
+
+ objective(
+  "ZWROTNICA — TOR B"
+ );
+
+ clickSound();
+ rumble(7);
+
+ await wait(2200);
+
+ $("#fade").style.opacity=1;
+
+ await wait(750);
+
+ state.timeline=1;
+ state.train=false;
+
+ train.visible=false;
+
+ timelineCar
+  .children
+  .forEach(c=>{
+
+   if(c.material&&
+      c.material!==M.black){
+
+    c.material=
+     material(
+      0x35536b,
+      .55,.25
+     );
+   }
+  });
+
+ player.pos.set(
+  -8,
+  1.72,
+  -138
+ );
+
+ await wait(250);
+
+ $("#fade").style.opacity=0;
+
+ await chapter(
+  "ROZDZIAŁ IV",
+  "DWA GREYFIELD"
+ );
+
+ dialogue([
+  ["MAYA","Jesteśmy z powrotem."],
+  ["ALEX","Nie do końca."],
+  ["MAYA","Co?"],
+  ["ALEX","Samochód przy skrzyżowaniu był czerwony."],
+  ["MAYA","Jest niebieski."],
+  ["ALEX","Wiem."],
+  ["MAYA","Alex, on zawsze był niebieski."],
+  ["ALEX","Sprawdźmy sklep."]
+ ],()=>setQuest("MILNERS"));
+}
+
+/* =========================================================
+   CHANGED GREYFIELD
+========================================================= */
+
+function changedShopScene(){
+
+ dialogue([
+  ["ALEX","Nie."],
+  ["MAYA","Co?"],
+  ["ALEX","Miller's."],
+  ["MAYA","Milner's."],
+  ["ALEX","Wczoraj było Miller's."],
+  ["MAYA","Alex, kupowaliśmy tutaj lody jako dzieci."],
+  ["ALEX","W Miller's."],
+  ["MAYA","W Milner's."],
+  ["ALEX","Pamiętam obie wersje."],
+  ["MAYA","Ja tylko jedną."],
+  ["ALEX","Wracamy do domu."]
+ ],()=>setQuest("RETURN_HOME"));
+}
+
+function changedHomeScene(){
+
+ dialogue([
+  ["MAYA","Dom wygląda normalnie."],
+  ["ALEX","Nie."],
+  ["MAYA","Co się zmieniło?"],
+  ["ALEX","Zdjęcie w salonie."],
+  ["MAYA","Jakie zdjęcie?"],
+  ["ALEX","Na nim były trzy osoby."],
+  ["MAYA","Alex... zawsze były cztery."]
+ ],()=>{
+
+  setQuest("PHOTO");
+
+  setTimeout(()=>{
+   dialogue([
+    ["ALEX","Kim jest ten chłopak?"],
+    ["MAYA","Nie poznajesz go?"],
+    ["ALEX","Nie."],
+    ["MAYA","To Daniel."],
+    ["ALEX","Nie znam żadnego Daniela."],
+    ["MAYA","Twój brat."],
+    ["ALEX","Nie mam brata."]
+   ],()=>{
+
+    setQuest("PHONE");
+
+    setTimeout(
+     phoneScene,
+     1700
+    );
+   });
+  },2200);
+ });
+}
+
+function phoneScene(){
+
+ dialogue([
+  ["ALEX","Telefon nie jest podłączony."],
+  ["MAYA","A jednak dzwoni."],
+  ["ALEX","Odbieram."],
+  ["???","Nie wyłączaj nadajnika."],
+  ["ALEX","Kim jesteś?"],
+  ["???","Ty już wiesz."],
+  ["ALEX","Nie wiem."],
+  ["???","03:17. Stacja. Ostatni kurs."],
+  ["ALEX","Halo?"],
+  ["MAYA","Rozłączył się?"],
+  ["ALEX","Tak."],
+  ["MAYA","Co powiedział?"],
+  ["ALEX","Musimy wrócić na stację."]
+ ],()=>setQuest("FINAL_STATION"));
+}
+
+/* =========================================================
+   MAP
+========================================================= */
+
+function toggleMap(){
+
+ if(!state.hasMap){
+
+  notify(
+   "Najpierw znajdź mapę Greyfield."
+  );
+
+  return;
+ }
+
+ mapOpen=!mapOpen;
+
+ $("#mapScreen").style.display=
+  mapOpen?"flex":"none";
+
+ if(mapOpen){
+
+  $("#mapText").innerHTML=
+  `
+  HAWTHORNE STREET — DOM WALKERÓW<br>
+  MILLER'S MARKET — 20 CENTRAL STREET<br>
+  GREYFIELD CINEMA — EAST STREET<br>
+  COUNTY MOTEL — OLD COUNTY ROAD<br>
+  POLICE DEPARTMENT — EAST STREET<br>
+  GREYFIELD SCHOOL — SOUTH BLOCK<br>
+  GREYFIELD CENTRAL — STATION ROAD<br>
+  TUNEL KOLEJOWY — KM 2.1<br>
+  CENTRALA T-17 — SERVICE ROAD
+  `;
+ }
+}
+
+/* =========================================================
+   COLLISIONS
+========================================================= */
+
+function canMove(x,z){
+
+ /*
+   City collider system.
+   Home doorway is genuinely empty after door collider disables.
+ */
+
+ for(const c of colliders){
+
+  if(!c.enabled)
+   continue;
+
+  /*
+   Collider coordinates are world coordinates.
+   Generated moving train isn't added to this array,
+   avoiding the old offset mismatch.
+  */
+
+  if(
+   x>
+    c.x-c.w/2-player.radius&&
+   x<
+    c.x+c.w/2+player.radius&&
+   z>
+    c.z-c.d/2-player.radius&&
+   z<
+    c.z+c.d/2+player.radius
+  ){
+
+   return false;
+  }
+ }
+
+ return true;
+}
+
+/* =========================================================
+   MOVEMENT
+========================================================= */
+
+function updatePlayer(dt){
+
+ if(
+  !playing||
+  dialogueActive||
+  mapOpen
+ )return;
+
+ let forward=0;
+ let side=0;
+
+ if(keys.KeyW)forward+=1;
+ if(keys.KeyS)forward-=1;
+
+ if(keys.KeyD)side+=1;
+ if(keys.KeyA)side-=1;
+
+ forward+=mobileForward;
+ side+=mobileSide;
+
+ const length=
+  Math.hypot(
+   forward,
+   side
+  );
+
+ if(length>1){
+
+  forward/=length;
+  side/=length;
+ }
+
+ const moving=
+  Math.abs(forward)>.05||
+  Math.abs(side)>.05;
+
+ const run=
+  keys.ShiftLeft&&
+  forward>.2;
+
+ const speed=
+  run?6.7:4.05;
+
+ const sin=
+  Math.sin(yaw);
+
+ const cos=
+  Math.cos(yaw);
+
+ const dx=
+  (
+   -sin*forward+
+   cos*side
+  )*speed*dt;
+
+ const dz=
+  (
+   -cos*forward-
+   sin*side
+  )*speed*dt;
+
+ if(
+  canMove(
+   player.pos.x+dx,
+   player.pos.z
+  )
+ ){
+
+  player.pos.x+=dx;
+ }
+
+ if(
+  canMove(
+   player.pos.x,
+   player.pos.z+dz
+  )
+ ){
+
+  player.pos.z+=dz;
+ }
+
+ player.vy-=12*dt;
+
+ player.pos.y+=
+  player.vy*dt;
+
+ if(player.pos.y<=1.72){
+
+  player.pos.y=1.72;
+  player.vy=0;
+  player.grounded=true;
+ }
+
+ if(
+  moving&&
+  player.grounded
+ ){
+
+  walkPhase+=
+   dt*(run?12:8);
+
+  const s=
+   Math.sin(walkPhase);
+
+  armL.rotation.x=
+   -.38+s*.17;
+
+  armR.rotation.x=
+   -.38-s*.17;
+
+  legL.rotation.x=
+   s*.2;
+
+  legR.rotation.x=
+   -s*.2;
+
+  flashlightModel.rotation.x=
+   s*.025;
+
+  stepSound(run);
+ }
+
+ camera.position.copy(
+  player.pos
+ );
+
+ camera.rotation.order=
+  "YXZ";
+
+ camera.rotation.y=
+  yaw;
+
+ camera.rotation.x=
+  pitch;
+
+ if(
+  state.flashlight&&
+  state.battery>0
+ ){
+
+  state.battery-=
+   dt*.09;
+
+  if(state.battery<=0){
+
+   state.battery=0;
+   state.flashlight=false;
+
+   refreshFlashlight();
+  }
+ }
+
+ $("#batteryFill").style.width=
+  state.battery+"%";
+}
+
+/* =========================================================
+   PC INPUT
+========================================================= */
+
+renderer.domElement.addEventListener(
+ "contextmenu",
+ e=>e.preventDefault()
+);
+
+renderer.domElement.addEventListener(
+ "mousedown",
+ e=>{
+
+  initAudio();
+
+  if(e.button===2){
+
+   drag=true;
+
+   lastMouseX=e.clientX;
+   lastMouseY=e.clientY;
+  }
+ }
+);
+
+window.addEventListener(
+ "mouseup",
+ e=>{
+
+  if(e.button===2)
+   drag=false;
+ }
+);
+
+window.addEventListener(
+ "mousemove",
+ e=>{
+
+  if(
+   !drag||
+   !playing||
+   mapOpen
+  )return;
+
+  const dx=
+   e.clientX-lastMouseX;
+
+  const dy=
+   e.clientY-lastMouseY;
+
+  lastMouseX=e.clientX;
+  lastMouseY=e.clientY;
+
+  yaw-=dx*.004;
+
+  pitch-=dy*.0035;
+
+  pitch=
+   THREE.MathUtils.clamp(
+    pitch,
+    -1.4,
+    1.4
+   );
+ }
+);
+
+window.addEventListener(
+ "keydown",
+ e=>{
+
+  initAudio();
+
+  keys[e.code]=true;
+
+  if(e.code==="KeyE")
+   interact();
+
+  if(e.code==="KeyF"){
+
+   state.flashlight=
+    !state.flashlight;
+
+   clickSound();
+
+   refreshFlashlight();
+  }
+
+  if(e.code==="KeyM")
+   toggleMap();
+
+  if(
+   e.code==="Space"&&
+   player.grounded&&
+   !dialogueActive&&
+   !mapOpen
+  ){
+
+   player.vy=5.1;
+   player.grounded=false;
+  }
+ }
+);
+
+window.addEventListener(
+ "keyup",
+ e=>{
+
+  keys[e.code]=false;
+ }
+);
+
+/* =========================================================
+   MOBILE JOYSTICK
+========================================================= */
+
+function setupMoveJoystick(){
+
+ const base=
+  $("#moveJoy");
+
+ const stick=
+  $("#moveStick");
+
+ let active=false;
+ let touchId=null;
+
+ function updateTouch(touch){
+
+  const rect=
+   base.getBoundingClientRect();
+
+  const cx=
+   rect.left+
+   rect.width/2;
+
+  const cy=
+   rect.top+
+   rect.height/2;
+
+  let dx=
+   touch.clientX-cx;
+
+  let dy=
+   touch.clientY-cy;
+
+  const max=
+   rect.width*.34;
+
+  const len=
+   Math.hypot(dx,dy);
+
+  if(len>max){
+
+   dx=
+    dx/len*max;
+
+   dy=
+    dy/len*max;
+  }
+
+  stick.style.transform=
+   `translate(calc(-50% + ${dx}px),calc(-50% + ${dy}px))`;
+
+  mobileSide=
+   dx/max;
+
+  mobileForward=
+   -dy/max;
+ }
+
+ base.addEventListener(
+  "touchstart",
+  e=>{
+
+   initAudio();
+
+   const t=
+    e.changedTouches[0];
+
+   touchId=t.identifier;
+   active=true;
+
+   updateTouch(t);
+
+   e.preventDefault();
+  },
+  {passive:false}
+ );
+
+ base.addEventListener(
+  "touchmove",
+  e=>{
+
+   if(!active)return;
+
+   for(const t of e.changedTouches){
+
+    if(t.identifier===touchId)
+     updateTouch(t);
+   }
+
+   e.preventDefault();
+  },
+  {passive:false}
+ );
+
+ function end(e){
+
+  for(const t of e.changedTouches){
+
+   if(t.identifier===touchId){
+
+    active=false;
+    touchId=null;
+
+    mobileSide=0;
+    mobileForward=0;
+
+    stick.style.transform=
+     "translate(-50%,-50%)";
+   }
+  }
+ }
+
+ base.addEventListener(
+  "touchend",
+  end
+ );
+
+ base.addEventListener(
+  "touchcancel",
+  end
+ );
+}
+
+setupMoveJoystick();
+
+/* =========================================================
+   MOBILE LOOK — drag anywhere on right half
+========================================================= */
+
+let lookTouchId=null;
+let lookX=0;
+let lookY=0;
+
+renderer.domElement.addEventListener(
+ "touchstart",
+ e=>{
+
+  initAudio();
+
+  for(const t of e.changedTouches){
+
+   if(
+    t.clientX>
+    innerWidth*.42&&
+    lookTouchId===null
+   ){
+
+    lookTouchId=
+     t.identifier;
+
+    lookX=t.clientX;
+    lookY=t.clientY;
+   }
+  }
+ },
+ {passive:false}
+);
+
+renderer.domElement.addEventListener(
+ "touchmove",
+ e=>{
+
+  if(
+   lookTouchId===null||
+   !playing||
+   mapOpen
+  )return;
+
+  for(const t of e.changedTouches){
+
+   if(
+    t.identifier===
+    lookTouchId
+   ){
+
+    const dx=
+     t.clientX-lookX;
+
+    const dy=
+     t.clientY-lookY;
+
+    lookX=t.clientX;
+    lookY=t.clientY;
+
+    yaw-=dx*.006;
+
+    pitch-=dy*.005;
+
+    pitch=
+     THREE.MathUtils.clamp(
+      pitch,
+      -1.4,
+      1.4
+     );
+   }
+  }
+
+  e.preventDefault();
+ },
+ {passive:false}
+);
+
+function endLook(e){
+
+ for(const t of e.changedTouches){
+
+  if(
+   t.identifier===
+   lookTouchId
+  ){
+
+   lookTouchId=null;
+  }
+ }
+}
+
+renderer.domElement.addEventListener(
+ "touchend",
+ endLook
+);
+
+renderer.domElement.addEventListener(
+ "touchcancel",
+ endLook
+);
+
+/* =========================================================
+   MOBILE BUTTONS
+========================================================= */
+
+function mobileButton(
+ selector,
+ callback
+){
+
+ const el=$(selector);
+
+ el.addEventListener(
+  "touchstart",
+  e=>{
+
+   initAudio();
+
+   callback();
+
+   e.preventDefault();
+  },
+  {passive:false}
+ );
+}
+
+mobileButton(
+ "#buttonE",
+ interact
+);
+
+mobileButton(
+ "#buttonJump",
+ ()=>{
+
+  if(
+   player.grounded&&
+   !dialogueActive&&
+   !mapOpen
+  ){
+
+   player.vy=5.1;
+   player.grounded=false;
+  }
+ }
+);
+
+mobileButton(
+ "#buttonFlash",
+ ()=>{
+
+  state.flashlight=
+   !state.flashlight;
+
+  clickSound();
+
+  refreshFlashlight();
+ }
+);
+
+mobileButton(
+ "#buttonMap",
+ toggleMap
+);
+
+/* =========================================================
+   TIME
+========================================================= */
+
+let timeCounter=0;
+
+function updateTime(dt){
+
+ if(!playing)return;
+
+ timeCounter+=dt;
+
+ /*
+   1 game minute every 10 real seconds.
+ */
+
+ if(timeCounter>=10){
+
+  timeCounter=0;
+
+  state.minutes++;
+
+  if(state.minutes>=1440){
+
+   state.minutes=0;
+   state.day++;
+  }
+ }
+
+ const h=
+  Math.floor(
+   state.minutes/60
+  );
+
+ const m=
+  state.minutes%60;
+
+ $("#timeUI").textContent=
+  String(h).padStart(2,"0")+
+  ":"+
+  String(m).padStart(2,"0");
+
+ $("#dateUI").textContent=
+  state.day+
+  ".10.1997";
+}
+
+/* =========================================================
+   SAVE
+========================================================= */
+
+function saveGame(){
+
+ try{
+
+  localStorage.setItem(
+   SAVE_KEY,
+   JSON.stringify({
+    state,
+    position:{
+     x:player.pos.x,
+     y:player.pos.y,
+     z:player.pos.z
+    },
+    yaw,
+    pitch
+   })
+  );
+
+ }catch(e){
+
+  console.warn(
+   "SAVE ERROR",
+   e
+  );
+ }
+}
+
+function restoreVisualState(){
+
+ tape1.visible=
+  !state.flags.tape1Taken;
+
+ physicalMap.visible=
+  !state.hasMap;
+
+ if(state.timeline>=1){
+
+  train.visible=false;
+ }
+
+ refreshFlashlight();
+}
+
+function loadGame(){
+
+ try{
+
+  const raw=
+   localStorage.getItem(
+    SAVE_KEY
+   );
+
+  if(!raw)return false;
+
+  const data=
+   JSON.parse(raw);
+
+  Object.assign(
+   state,
+   data.state
+  );
+
+  if(data.position){
+
+   player.pos.set(
+    data.position.x,
+    data.position.y,
+    data.position.z
+   );
+  }
+
+  yaw=data.yaw??Math.PI;
+  pitch=data.pitch??0;
+
+  restoreVisualState();
+
+  return true;
+
+ }catch(e){
+
+  console.error(e);
+
+  return false;
+ }
+}
+
+/* =========================================================
+   START GAME
+========================================================= */
+
+async function startNewGame(){
+
+ localStorage.removeItem(
+  SAVE_KEY
+ );
+
+ state.quest=
+  "INTRO_MAYA";
+
+ state.minutes=
+  23*60+48;
+
+ state.day=18;
+
+ state.flashlight=false;
+ state.battery=100;
+
+ state.hasMap=false;
+
+ state.timeline=0;
+ state.train=false;
+
+ state.flags={};
+
+ player.pos.copy(
+  LOC.BUS
+ );
+
+ player.pos.y=1.72;
+
+ yaw=Math.PI;
+ pitch=0;
+
+ tape1.visible=true;
+ tape2.visible=false;
+ physicalMap.visible=true;
+
+ $("#menu").style.display=
+  "none";
+
+ $("#hud").style.display=
+  "block";
+
+ $("#fade").style.opacity=0;
+
+ playing=true;
+
+ initAudio();
+
+ await chapter(
+  "PROLOG",
+  "POWRÓT DO GREYFIELD"
+ );
+
+ showArea(
+  "Greyfield",
+  "18 PAŹDZIERNIKA 1997"
+ );
+
+ dialogue([
+  ["ALEX","Greyfield."],
+  ["ALEX","Sześć miesięcy i nic się nie zmieniło."],
+  ["ALEX","Maya miała czekać przy Hawthorne Street."]
+ ],()=>setQuest("INTRO_MAYA"));
+}
+
+async function continueGame(){
+
+ if(!loadGame()){
+
+  startNewGame();
+  return;
+ }
+
+ $("#menu").style.display=
+  "none";
+
+ $("#hud").style.display=
+  "block";
+
+ $("#fade").style.opacity=0;
+
+ playing=true;
+
+ initAudio();
+
+ setQuest(
+  state.quest
+ );
+}
+
+/* =========================================================
+   MENU
+========================================================= */
+
+$("#newGame").onclick=
+ startNewGame;
+
+$("#continueGame").onclick=
+ continueGame;
+
+$("#deleteSave").onclick=
+ ()=>{
+
+  localStorage.removeItem(
+   SAVE_KEY
+  );
+
+  $("#continueGame").style.opacity=
+   ".2";
+
+  notify(
+   "Zapis usunięty."
+  );
+ };
+
+/* =========================================================
+   LOADING
+========================================================= */
+
+async function loading(){
+
+ const steps=[
+  [5,"INICJALIZACJA"],
+  [12,"BUDOWANIE GREYFIELD"],
+  [21,"BUDOWANIE ULIC"],
+  [30,"BUDOWANIE DOMU"],
+  [39,"TWORZENIE POSTACI"],
+  [48,"TWORZENIE LATARKI"],
+  [57,"BUDOWANIE STACJI"],
+  [68,"BUDOWANIE POCIĄGU 117"],
+  [78,"GENEROWANIE KOLIZJI"],
+  [87,"URUCHAMIANIE FABUŁY"],
+  [94,"PRZYGOTOWYWANIE MOBILE UI"],
+  [100,"GOTOWE"]
+ ];
+
+ for(const [percent,text] of steps){
+
+  $("#loadFill").style.width=
+   percent+"%";
+
+  $("#loadText").textContent=
+   text;
+
+  await wait(
+   90+Math.random()*100
+  );
+ }
+
+ await wait(300);
+
+ $("#loading").style.display=
+  "none";
+
+ $("#menu").style.display=
+  "block";
+
+ $("#fade").style.opacity=0;
+
+ if(
+  !localStorage.getItem(
+   SAVE_KEY
+  )
+ ){
+
+  $("#continueGame").style.opacity=
+   ".2";
+ }
+}
+
+/* =========================================================
+   AUTOSAVE
+========================================================= */
+
+setInterval(()=>{
+
+ if(playing)
+  saveGame();
+
+},12000);
+
+/* =========================================================
+   RESIZE
+========================================================= */
+
+window.addEventListener(
+ "resize",
+ ()=>{
+
+  camera.aspect=
+   innerWidth/innerHeight;
+
+  camera.updateProjectionMatrix();
+
+  renderer.setSize(
+   innerWidth,
+   innerHeight
+  );
+ }
+);
+
+/* =========================================================
+   MAIN LOOP
+========================================================= */
+
+function loop(){
+
+ requestAnimationFrame(loop);
+
+ const dt=
+  Math.min(
+   clock.getDelta(),
+   .04
+  );
+
+ updatePlayer(dt);
+
+ updateInteraction();
+
+ updateWaypoint(dt);
+
+ updateTime(dt);
+
+ updateStory();
+
+ renderer.render(
+  scene,
+  camera
+ );
+}
+
+camera.position.copy(
+ player.pos
+);
+
+loop();
+loading();
+
+</script>
+</body>
+</html>
