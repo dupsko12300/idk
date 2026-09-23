@@ -1,0 +1,15 @@
+ECHO_1997 — GitHub root package
+
+WRZUĆ ZAWARTOŚĆ TEGO FOLDERU BEZPOŚREDNIO DO GŁÓWNEGO KATALOGU REPO.
+
+Po wrzuceniu w repo na samej górze mają być:
+.github/
+app/
+build.gradle
+gradle.properties
+settings.gradle
+
+Workflow:
+.github/workflows/build-apk.yml
+
+Po commicie GitHub Actions zbuduje artefakt ECHO_1997-APK zawierający ECHO_1997.apk.
